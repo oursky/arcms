@@ -1,0 +1,17 @@
+disabled_rules:
+    - force_cast
+included: # paths to include during linting. `--path` is ignored if present.
+    - ARDemo
+excluded: # paths to ignore during linting. Takes precedence over `included`.
+
+cyclomatic_complexity: 12
+line_length: 150
+
+force_cast: warning
+function_body_length:
+    - 100
+    - 200
+
+type_body_length:
+    - 300
+    - 500
