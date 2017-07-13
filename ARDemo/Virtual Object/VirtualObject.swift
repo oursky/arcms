@@ -16,7 +16,7 @@ class VirtualObject: SCNNode {
     var fileExtension: String = ""
     var modelLoaded: Bool = false
 
-    var viewController: ViewController?
+    var viewController: ARViewController?
 
     override init() {
         super.init()
@@ -42,6 +42,19 @@ class VirtualObject: SCNNode {
             return
         }
 
+        for child in virtualObjectScene.rootNode.childNodes {
+            child.geometry?.firstMaterial?.lightingModel = .physicallyBased
+            child.movabilityHint = .fixed
+        }
+
+        self.addChildNode(virtualObjectScene.rootNode)
+
+        print("[VirtualObject] model loaded")
+
+        modelLoaded = true
+    }
+
+    func loadModel(_ virtualObjectScene: SCNScene) {
         for child in virtualObjectScene.rootNode.childNodes {
             child.geometry?.firstMaterial?.lightingModel = .physicallyBased
             child.movabilityHint = .fixed

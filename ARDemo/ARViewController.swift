@@ -25,13 +25,12 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     var centerPt: UIView!
 
     var virtualObject: VirtualObject?
+    var voDownloader = VODownloader()
 
     var recentVirtualObjectDistances = [CGFloat]()
 
     // MARK: Core Image
     var qrDetector = CIDetector(ofType: CIDetectorTypeQRCode, context: nil, options: nil)
-
-    weak var delegate: ARViewControllerDelegate?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -130,13 +129,24 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
             print("corners \(corners)")
             print("message \(message)")
 
-            delegate?.didReadQRCode(message: message)
-
             drawFocusSquare(corners: corners)
 
             let centroid = Utilities.intersection(u1: corners[0], u2: corners[2], v1: corners[1], v2: corners[3])
             print("centroid \(centroid)")
-            renderVirtualObjectByScreenPos(screenPos: centroid, virtualObject: virtualObject)
+
+            if let url = URL(string: message) {
+                voDownloader.downloadSCN(url: url, completion: { virtualObject in
+                    self.virtualObject?.removeFromParentNode()
+                    self.virtualObject = virtualObject
+                    self.virtualObject?.viewController = self
+                })
+            } else {
+                print("Incorrect url: \(message)")
+            }
+
+            if virtualObject != nil {
+                renderVirtualObjectByScreenPos(screenPos: centroid, virtualObject: virtualObject)
+            }
         }
     }
 
@@ -204,8 +214,4 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         let planeAnchor: ARPlaneAnchor?
         let hitAPlane: Bool
     }
-}
-
-protocol ARViewControllerDelegate: class {
-    func didReadQRCode(message: String)
 }
