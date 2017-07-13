@@ -26,11 +26,14 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     var lineView: LineView!
     var centerPt: UIView!
 
-    var position: CGPoint? {
-        didSet {
-            virtualObject?.translateBasedOnScreenPos(position!, instantly: true, infinitePlane: false)
-        }
-    }
+    // MARK: Core Image
+    var qrDetector = CIDetector(ofType: CIDetectorTypeQRCode, context: nil, options: nil)
+
+//    var position: CGPoint? {
+//        didSet {
+//            virtualObject?.translateBasedOnScreenPos(position!, instantly: true, infinitePlane: false)
+//        }
+//    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -74,6 +77,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
             self.virtualObject?.loadModel()
             self.virtualObject?.viewController = self
         }
+
+        enableEnvironmentMapWithIntensity(25.0)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -84,17 +89,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
 
         // Start the ARSession.
         restartPlaneDetection()
-    }
-
-    override func updateViewConstraints() {
-//        let viewMargins = view.layoutMarginsGuide
-//        let sceneViewMargins = sceneView.layoutMarginsGuide
-//        sceneViewMargins.topAnchor.constraint(equalTo: viewMargins.topAnchor, constant: 0).isActive = true
-//        sceneViewMargins.bottomAnchor.constraint(equalTo: viewMargins.bottomAnchor, constant: 0).isActive = true
-//        sceneViewMargins.leftAnchor.constraint(equalTo: viewMargins.leftAnchor, constant: 0).isActive = true
-//        sceneViewMargins.rightAnchor.constraint(equalTo: viewMargins.rightAnchor, constant: 0).isActive = true
-
-        super.updateViewConstraints()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -120,69 +114,146 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     // MARK: ARSessionDelegate
     var counter: Int = 0
     // check once after this interval
-    var checkInterval = 5
+    var checkInterval = 10
 
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
         counter = (counter + 1) % checkInterval
 
         if counter == 0 {
             print("searching for QR code")
-            let requests = [VNDetectBarcodesRequest(completionHandler: completionHandler)]
-            guard let _ = try? imageRequestHandler.perform(requests, on: frame.capturedImage) else {
-                print("fail to perform barcode-request")
+
+//            let requests = [VNDetectBarcodesRequest(completionHandler: { request, error in
+//                let ciImage = CIImage(cvPixelBuffer: frame.capturedImage)
+//                self.completionHandler(request: request, error: error, ciImage: ciImage)
+//            })]
+//            guard let _ = try? imageRequestHandler.perform(requests, on: frame.capturedImage) else {
+//                print("fail to perform barcode-request")
+//                return
+//            }
+
+            let ciImage = CIImage(cvImageBuffer: frame.capturedImage)
+            let retval = extractQRInfo(ciImage: ciImage)
+//            print("retval \(retval)")
+            guard retval != nil else {
+                showIndicator(false)
                 return
             }
+
+            showIndicator(true)
+            let (corners, message) = retval as! ([CGPoint], String)
+            print("corners \(corners)")
+            print("message \(message)")
+
+            drawFocusSquare(corners: corners)
+
+            let centroid = Utilities.intersection(u1: corners[0], u2: corners[2], v1: corners[1], v2: corners[3])
+            print("centroid \(centroid)")
+            renderVirtualObjectByScreenPos(screenPos: centroid, virtualObject: virtualObject)
         }
     }
 
-    func completionHandler(request: VNRequest, error: Error?) {
-        if error != nil { print(error as Any) }
-        //        print("request \(request)")
+//    func completionHandler(request: VNRequest, error: Error?, ciImage: CIImage) {
+//        if error != nil { print(error as Any) }
+//        //        print("request \(request)")
+//
+//        guard let results = request.results as? [VNBarcodeObservation] else {
+//            print("[VC] no results found")
+//            return
+//        }
+//
+//        if results.count == 0 { showIndicator(false) } else { showIndicator(true) }
+//
+//        // Loopm through the found results
+//        for result in results {
+//
+//            // Cast the result to a barcode-observation
+//            if let barcode = result as? VNBarcodeObservation {
+//
+//                // Print barcode-values
+//                print("Symbology: \(barcode.symbology.rawValue)")
+//
+//                if let desc = barcode.barcodeDescriptor as? CIQRCodeDescriptor {
+//                    print("errorCorrectedPayload \(desc.errorCorrectedPayload.count)")
+//
+//                    var vals = ""
+//                    for val in desc.errorCorrectedPayload {
+//                        vals += String(format:"%2X", val) + " "
+//                    }
+//
+//                    print("Payload raw value: \(vals)")
+//
+//                    let content = String(data: desc.errorCorrectedPayload, encoding: .utf8)
+////                    print("Description: \(desc.description)")
+//
+//                    // FIXME: This currently returns nil. I did not find any docs on how to encode the data properly so far.
+//                    print("Payload: \(String(describing: content))")
+//                    print("Error-Correction-Level: \(desc.errorCorrectionLevel.rawValue)")
+////                    print("Symbol-Version: \(desc.symbolVersion)")
+////                    print("Bounding box: \(barcode.boundingBox)")
+//
+//                    let topLeft = CGPoint(x:barcode.topLeft.y*view.frame.width, y: barcode.topLeft.x*view.frame.height)
+//                    let topRight = CGPoint(x: barcode.topRight.y*view.frame.width, y: barcode.topRight.x*view.frame.height)
+//                    let bottomRight = CGPoint(x: barcode.bottomRight.y*view.frame.width, y: barcode.bottomRight.x*view.frame.height)
+//                    let bottomLeft = CGPoint(x: barcode.bottomLeft.y*view.frame.width, y: barcode.bottomLeft.x*view.frame.height)
+//
+////                    print("Points \(topLeft) \(topRight) \(bottomRight) \(bottomLeft)")
+//
+//                    let pts = [topLeft, topRight, bottomRight, bottomLeft]
+//                    lineView.setPoints(pts)
+//
+//                    let centroid = Utilities.intersection(u1: topLeft, u2: bottomRight, v1: topRight, v2: bottomLeft)
+//                    print("Centroid \(centroid)")
+//                    centerPt.frame = CGRect(x: centroid.x, y: centroid.y, width: 5, height: 5)
+//
+//                    position = centroid
+//                }
+//            }
+//        }
+//    }
 
-        guard let results = request.results as? [VNBarcodeObservation] else {
-            print("[VC] no results found")
-            return
+    // input the image and return the four corners (topLeft -> topRight -> bottomRight -> bottomLeft) and the decoded content of the qr code if any
+    func extractQRInfo(ciImage: CIImage) -> (corners: [CGPoint], String)? {
+        let features = qrDetector?.features(in: ciImage)
+        guard features?.count != 0 else { return nil }
+
+        // currently only picking the fist qr code detected
+        if let feature = (features?.first) as? CIQRCodeFeature {
+//            print("[QR] detected content \(feature.messageString)")
+            guard feature.messageString != nil else { return nil }
+            let topLeft = CGPoint(x: feature.topLeft.y/2, y: feature.topLeft.x/2)
+            let topRight = CGPoint(x: feature.topRight.y/2, y: feature.topRight.x/2)
+            let bottomRight = CGPoint(x: feature.bottomRight.y/2, y: feature.bottomRight.x/2)
+            let bottomLeft = CGPoint(x: feature.bottomLeft.y/2, y: feature.bottomLeft.x/2)
+            let corners = [topLeft, topRight, bottomRight, bottomLeft]
+            return (corners, feature.messageString!)
+        } else {
+            return nil
         }
+    }
 
-        if results.count == 0 { showIndicator(false) } else { showIndicator(true) }
+    func drawFocusSquare(corners: [CGPoint]) {
+        let centroid = Utilities.intersection(u1: corners[0], u2: corners[2], v1: corners[1], v2: corners[3])
+        centerPt.frame = CGRect(x: centroid.x, y: centroid.y, width: 5, height: 5)
+        lineView.setPoints(corners)
+    }
 
-        // Loopm through the found results
-        for result in results {
+    func renderVirtualObjectByScreenPos(screenPos: CGPoint, virtualObject: VirtualObject?) {
+        guard virtualObject != nil else {return}
 
-            // Cast the result to a barcode-observation
-            if let barcode = result as? VNBarcodeObservation {
+        if !(virtualObject?.modelLoaded)! { virtualObject?.loadModel() }
 
-                // Print barcode-values
-                print("Symbology: \(barcode.symbology.rawValue)")
+        virtualObject?.translateBasedOnScreenPos(screenPos, instantly: true, infinitePlane: false)
+    }
 
-                if let desc = barcode.barcodeDescriptor as? CIQRCodeDescriptor {
-                    print("errorCorrectedPayload \(desc.errorCorrectedPayload.count)")
-                    let content = String(data: desc.errorCorrectedPayload, encoding: .utf8)
-                    print("Description: \(desc.description)")
+    // MARK: ARSCNViewDelegate
+    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
+        DispatchQueue.main.async {
 
-                    // FIXME: This currently returns nil. I did not find any docs on how to encode the data properly so far.
-                    print("Payload: \(String(describing: content))")
-                    print("Error-Correction-Level: \(desc.errorCorrectionLevel)")
-                    print("Symbol-Version: \(desc.symbolVersion)")
-                    print("Bounding box: \(barcode.boundingBox)")
-
-                    let topLeft = CGPoint(x:barcode.topLeft.y*view.frame.width, y: barcode.topLeft.x*view.frame.height)
-                    let topRight = CGPoint(x: barcode.topRight.y*view.frame.width, y: barcode.topRight.x*view.frame.height)
-                    let bottomRight = CGPoint(x: barcode.bottomRight.y*view.frame.width, y: barcode.bottomRight.x*view.frame.height)
-                    let bottomLeft = CGPoint(x: barcode.bottomLeft.y*view.frame.width, y: barcode.bottomLeft.x*view.frame.height)
-
-                    print("Points \(topLeft) \(topRight) \(bottomRight) \(bottomLeft)")
-
-                    let pts = [topLeft, topRight, bottomRight, bottomLeft]
-                    lineView.setPoints(pts)
-
-                    let centroid = Utilities.intersection(u1: topLeft, u2: bottomRight, v1: topRight, v2: bottomLeft)
-                    //                    let centroid = Utilities.getIntersectionOfLines(line1: (topLeft, bottomRight), line2: (topRight, bottomLeft))
-                    print("centroid \(centroid)")
-                    centerPt.frame = CGRect(x: centroid.x, y: centroid.y, width: 5, height: 5)
-
-                    position = centroid
-                }
+            // If light estimation is enabled, update the intensity of the model's lights and the environment map
+            if let lightEstimate = self.session.currentFrame?.lightEstimate {
+                self.enableEnvironmentMapWithIntensity(lightEstimate.ambientIntensity / 100)
+            } else {
+                self.enableEnvironmentMapWithIntensity(25)
             }
         }
     }
@@ -284,7 +355,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
 
     func setNewVirtualObjectPosition(_ pos: SCNVector3) {
 
-        // in case you want to limit the distance of the object from the camera, you may these codes
+        // in case you want to limit the distance of the object from the camera, you may need these codes
 
 //        guard let object = virtualObject, let cameraTransform = sceneView.session.currentFrame?.camera.transform else {
 //            return
@@ -364,6 +435,17 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         } else {
             updateVirtualObjectPosition(newPosition, filterPosition)
         }
+    }
+
+    func enableEnvironmentMapWithIntensity(_ intensity: CGFloat) {
+        if sceneView.scene.lightingEnvironment.contents == nil {
+            if let environmentMap = UIImage(named: "art.scnassets/sharedImages/environment_blur.exr") {
+                sceneView.scene.lightingEnvironment.contents = environmentMap
+            } else {
+                print("Unable to load environment map")
+            }
+        }
+        sceneView.scene.lightingEnvironment.intensity = intensity
     }
 
 }
