@@ -16,4 +16,4 @@ type_body_length:
     - 300
     - 500
 
-warning_threshold: 0
+warning_threshold: 1
