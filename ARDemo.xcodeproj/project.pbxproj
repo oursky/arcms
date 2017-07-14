@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E39E78D0E8286A79B5FA526 /* Pods_ARDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F35A57ABAECF6245AC57709 /* Pods_ARDemo.framework */; };
 		440312BC1F14EACA0088DD05 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 440312BB1F14EACA0088DD05 /* Utilities.swift */; };
+		443B927C1F174D46009BF68E /* ARViewController+VirtualObjectManipulation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 443B927B1F174D46009BF68E /* ARViewController+VirtualObjectManipulation.swift */; };
 		4468724C1F14CFB200146FC7 /* VirtualObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4468724B1F14CFB200146FC7 /* VirtualObject.swift */; };
 		4468724E1F14D06800146FC7 /* LineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4468724D1F14D06800146FC7 /* LineView.swift */; };
 		446E3F581F14C15E005EE384 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446E3F571F14C15E005EE384 /* AppDelegate.swift */; };
@@ -44,7 +46,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		106DE7DDAA50A3DFB12E3728 /* Pods-ARDemoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARDemoTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ARDemoTests/Pods-ARDemoTests.debug.xcconfig"; sourceTree = "<group>"; };
+		3170A15E03CBA1EEBE726D36 /* Pods-ARDemoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARDemoTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-ARDemoTests/Pods-ARDemoTests.release.xcconfig"; sourceTree = "<group>"; };
 		440312BB1F14EACA0088DD05 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
+		443B927B1F174D46009BF68E /* ARViewController+VirtualObjectManipulation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ARViewController+VirtualObjectManipulation.swift"; sourceTree = "<group>"; };
 		4468724B1F14CFB200146FC7 /* VirtualObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualObject.swift; sourceTree = "<group>"; };
 		4468724D1F14D06800146FC7 /* LineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineView.swift; sourceTree = "<group>"; };
 		446E3F541F14C15E005EE384 /* ARDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -169,6 +174,7 @@
 				446872441F14CC0600146FC7 /* Virtual Object */,
 				446E3F571F14C15E005EE384 /* AppDelegate.swift */,
 				4468724D1F14D06800146FC7 /* LineView.swift */,
+				44FFE06A1F1741550043AAA9 /* VODownloader.swift */,
 				446E3F5E1F14C15E005EE384 /* Assets.xcassets */,
 				446E3F601F14C15E005EE384 /* LaunchScreen.storyboard */,
 				446E3F631F14C15E005EE384 /* Info.plist */,
@@ -192,6 +198,29 @@
 				446E3F791F14C15E005EE384 /* Info.plist */,
 			);
 			path = ARDemoUITests;
+			sourceTree = "<group>";
+		};
+		4F2408B6223F6AE612BE9F00 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4F35A57ABAECF6245AC57709 /* Pods_ARDemo.framework */,
+				D2A19B006CFFB79618915AD5 /* Pods_ARDemoTests.framework */,
+				C51E236B2F62448B274675CE /* Pods_ARDemoUITests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		8181B153F98541E1062C6145 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				922C0C156AE57EEEF53E172F /* Pods-ARDemo.debug.xcconfig */,
+				4AE7F96103A7D772BF411722 /* Pods-ARDemo.release.xcconfig */,
+				106DE7DDAA50A3DFB12E3728 /* Pods-ARDemoTests.debug.xcconfig */,
+				3170A15E03CBA1EEBE726D36 /* Pods-ARDemoTests.release.xcconfig */,
+				6ACE3417186E365CD470D8D3 /* Pods-ARDemoUITests.debug.xcconfig */,
+				B7BC58642CA964B9D8AD0F00 /* Pods-ARDemoUITests.release.xcconfig */,
+			);
+			name = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -494,6 +523,7 @@
 				446E3F581F14C15E005EE384 /* AppDelegate.swift in Sources */,
 				440312BC1F14EACA0088DD05 /* Utilities.swift in Sources */,
 				448D20E71F15C9AA004C2101 /* Cup.swift in Sources */,
+				443B927C1F174D46009BF68E /* ARViewController+VirtualObjectManipulation.swift in Sources */,
 				4468724C1F14CFB200146FC7 /* VirtualObject.swift in Sources */,
 				448D20E91F15C9C9004C2101 /* Jet.swift in Sources */,
 				5F11B0BE1F18A3430008F08A /* ARViewController+VirtualObjectManipulation.swift in Sources */,
