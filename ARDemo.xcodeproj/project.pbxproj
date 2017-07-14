@@ -11,16 +11,19 @@
 		4468724C1F14CFB200146FC7 /* VirtualObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4468724B1F14CFB200146FC7 /* VirtualObject.swift */; };
 		4468724E1F14D06800146FC7 /* LineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4468724D1F14D06800146FC7 /* LineView.swift */; };
 		446E3F581F14C15E005EE384 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446E3F571F14C15E005EE384 /* AppDelegate.swift */; };
-		446E3F5A1F14C15E005EE384 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446E3F591F14C15E005EE384 /* ViewController.swift */; };
 		446E3F5F1F14C15E005EE384 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 446E3F5E1F14C15E005EE384 /* Assets.xcassets */; };
 		446E3F621F14C15E005EE384 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 446E3F601F14C15E005EE384 /* LaunchScreen.storyboard */; };
 		446E3F6D1F14C15E005EE384 /* ARDemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446E3F6C1F14C15E005EE384 /* ARDemoTests.swift */; };
 		446E3F781F14C15E005EE384 /* ARDemoUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446E3F771F14C15E005EE384 /* ARDemoUITests.swift */; };
 		448D20E71F15C9AA004C2101 /* Cup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 448D20E61F15C9AA004C2101 /* Cup.swift */; };
 		448D20E91F15C9C9004C2101 /* Jet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 448D20E81F15C9C9004C2101 /* Jet.swift */; };
-		449B22041F15ED9300938264 /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 449B22031F15ED9300938264 /* art.scnassets */; };
-		449B22051F15ED9300938264 /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 449B22031F15ED9300938264 /* art.scnassets */; };
-		449B22061F15ED9300938264 /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 449B22031F15ED9300938264 /* art.scnassets */; };
+		497897093CDE214A9BA73127 /* Pods_ARDemoUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D2DE9D685D21BB56024314D /* Pods_ARDemoUITests.framework */; };
+		5E7EF04D5FBBE6F5D2F88F78 /* Pods_ARDemoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69B47582C80A4A6307F6544D /* Pods_ARDemoTests.framework */; };
+		5F11B0BD1F18A3430008F08A /* ARViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F11B0BA1F18A3430008F08A /* ARViewController.swift */; };
+		5F11B0BE1F18A3430008F08A /* ARViewController+VirtualObjectManipulation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F11B0BB1F18A3430008F08A /* ARViewController+VirtualObjectManipulation.swift */; };
+		5F11B0BF1F18A3430008F08A /* VODownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F11B0BC1F18A3430008F08A /* VODownloader.swift */; };
+		5F11B0C11F18AAF70008F08A /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 5F11B0C01F18AAF70008F08A /* art.scnassets */; };
+		75FEB60D37D2BEC951C2342B /* Pods_ARDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8735E640DE6E64B38310C735 /* Pods_ARDemo.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,7 +49,6 @@
 		4468724D1F14D06800146FC7 /* LineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineView.swift; sourceTree = "<group>"; };
 		446E3F541F14C15E005EE384 /* ARDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		446E3F571F14C15E005EE384 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		446E3F591F14C15E005EE384 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		446E3F5E1F14C15E005EE384 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		446E3F611F14C15E005EE384 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		446E3F631F14C15E005EE384 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -58,7 +60,19 @@
 		446E3F791F14C15E005EE384 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		448D20E61F15C9AA004C2101 /* Cup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cup.swift; sourceTree = "<group>"; };
 		448D20E81F15C9C9004C2101 /* Jet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Jet.swift; sourceTree = "<group>"; };
-		449B22031F15ED9300938264 /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; name = art.scnassets; path = ../../Documents/art.scnassets; sourceTree = "<group>"; };
+		5D2DE9D685D21BB56024314D /* Pods_ARDemoUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ARDemoUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5F11B0BA1F18A3430008F08A /* ARViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ARViewController.swift; sourceTree = "<group>"; };
+		5F11B0BB1F18A3430008F08A /* ARViewController+VirtualObjectManipulation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ARViewController+VirtualObjectManipulation.swift"; sourceTree = "<group>"; };
+		5F11B0BC1F18A3430008F08A /* VODownloader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VODownloader.swift; sourceTree = "<group>"; };
+		5F11B0C01F18AAF70008F08A /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
+		69B47582C80A4A6307F6544D /* Pods_ARDemoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ARDemoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		74E87FE90491E10D331FC2AF /* Pods-ARDemoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARDemoTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ARDemoTests/Pods-ARDemoTests.debug.xcconfig"; sourceTree = "<group>"; };
+		76006A8AE38C06B4962E2C84 /* Pods-ARDemoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARDemoTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-ARDemoTests/Pods-ARDemoTests.release.xcconfig"; sourceTree = "<group>"; };
+		8735E640DE6E64B38310C735 /* Pods_ARDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ARDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A611D6B2010727B07F397C63 /* Pods-ARDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-ARDemo/Pods-ARDemo.release.xcconfig"; sourceTree = "<group>"; };
+		BCF6D9CCC4F1BC152AACDA94 /* Pods-ARDemoUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARDemoUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-ARDemoUITests/Pods-ARDemoUITests.release.xcconfig"; sourceTree = "<group>"; };
+		C213BBC7CE33F7E73242F0F0 /* Pods-ARDemoUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARDemoUITests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ARDemoUITests/Pods-ARDemoUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		F9B1922ACC6A927F49AE4119 /* Pods-ARDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ARDemo/Pods-ARDemo.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +80,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				75FEB60D37D2BEC951C2342B /* Pods_ARDemo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -73,6 +88,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5E7EF04D5FBBE6F5D2F88F78 /* Pods_ARDemoTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,12 +96,36 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				497897093CDE214A9BA73127 /* Pods_ARDemoUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1A02350991EA22329C02820F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				8735E640DE6E64B38310C735 /* Pods_ARDemo.framework */,
+				69B47582C80A4A6307F6544D /* Pods_ARDemoTests.framework */,
+				5D2DE9D685D21BB56024314D /* Pods_ARDemoUITests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		1BE264EAD57E6377AC012CFB /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				F9B1922ACC6A927F49AE4119 /* Pods-ARDemo.debug.xcconfig */,
+				A611D6B2010727B07F397C63 /* Pods-ARDemo.release.xcconfig */,
+				74E87FE90491E10D331FC2AF /* Pods-ARDemoTests.debug.xcconfig */,
+				76006A8AE38C06B4962E2C84 /* Pods-ARDemoTests.release.xcconfig */,
+				C213BBC7CE33F7E73242F0F0 /* Pods-ARDemoUITests.debug.xcconfig */,
+				BCF6D9CCC4F1BC152AACDA94 /* Pods-ARDemoUITests.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		446872441F14CC0600146FC7 /* Virtual Object */ = {
 			isa = PBXGroup;
 			children = (
@@ -104,6 +144,8 @@
 				446E3F6B1F14C15E005EE384 /* ARDemoTests */,
 				446E3F761F14C15E005EE384 /* ARDemoUITests */,
 				446E3F551F14C15E005EE384 /* Products */,
+				1BE264EAD57E6377AC012CFB /* Pods */,
+				1A02350991EA22329C02820F /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -120,10 +162,12 @@
 		446E3F561F14C15E005EE384 /* ARDemo */ = {
 			isa = PBXGroup;
 			children = (
-				449B22031F15ED9300938264 /* art.scnassets */,
+				5F11B0BA1F18A3430008F08A /* ARViewController.swift */,
+				5F11B0BB1F18A3430008F08A /* ARViewController+VirtualObjectManipulation.swift */,
+				5F11B0BC1F18A3430008F08A /* VODownloader.swift */,
+				5F11B0C01F18AAF70008F08A /* art.scnassets */,
 				446872441F14CC0600146FC7 /* Virtual Object */,
 				446E3F571F14C15E005EE384 /* AppDelegate.swift */,
-				446E3F591F14C15E005EE384 /* ViewController.swift */,
 				4468724D1F14D06800146FC7 /* LineView.swift */,
 				446E3F5E1F14C15E005EE384 /* Assets.xcassets */,
 				446E3F601F14C15E005EE384 /* LaunchScreen.storyboard */,
@@ -157,10 +201,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 446E3F7C1F14C15E005EE384 /* Build configuration list for PBXNativeTarget "ARDemo" */;
 			buildPhases = (
+				D1BFC9DF5F4546E08765CADD /* [CP] Check Pods Manifest.lock */,
 				446E3F501F14C15E005EE384 /* Sources */,
 				446E3F511F14C15E005EE384 /* Frameworks */,
 				446E3F521F14C15E005EE384 /* Resources */,
 				449B22081F15F58000938264 /* Run Lint */,
+				AAEC9FDA4F62C45773A9797D /* [CP] Embed Pods Frameworks */,
+				78288A88E62F51BB7148D5B7 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -175,9 +222,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 446E3F7F1F14C15E005EE384 /* Build configuration list for PBXNativeTarget "ARDemoTests" */;
 			buildPhases = (
+				4C2DA6776F13E2002908D404 /* [CP] Check Pods Manifest.lock */,
 				446E3F641F14C15E005EE384 /* Sources */,
 				446E3F651F14C15E005EE384 /* Frameworks */,
 				446E3F661F14C15E005EE384 /* Resources */,
+				3F41D39418D5ED287E10FFCE /* [CP] Embed Pods Frameworks */,
+				15B313C5B661EC8A904C2928 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -193,9 +243,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 446E3F821F14C15E005EE384 /* Build configuration list for PBXNativeTarget "ARDemoUITests" */;
 			buildPhases = (
+				A15506316F8228A4DD97A715 /* [CP] Check Pods Manifest.lock */,
 				446E3F6F1F14C15E005EE384 /* Sources */,
 				446E3F701F14C15E005EE384 /* Frameworks */,
 				446E3F711F14C15E005EE384 /* Resources */,
+				7A0772F76B3A5AADAFE2027F /* [CP] Embed Pods Frameworks */,
+				4AEBD747ACEB6A1FB55E1F17 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -257,7 +310,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				446E3F621F14C15E005EE384 /* LaunchScreen.storyboard in Resources */,
-				449B22041F15ED9300938264 /* art.scnassets in Resources */,
+				5F11B0C11F18AAF70008F08A /* art.scnassets in Resources */,
 				446E3F5F1F14C15E005EE384 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -266,7 +319,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				449B22051F15ED9300938264 /* art.scnassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -274,13 +326,42 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				449B22061F15ED9300938264 /* art.scnassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		15B313C5B661EC8A904C2928 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ARDemoTests/Pods-ARDemoTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		3F41D39418D5ED287E10FFCE /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ARDemoTests/Pods-ARDemoTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		449B22081F15F58000938264 /* Run Lint */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -295,6 +376,111 @@
 			shellPath = /bin/sh;
 			shellScript = "if which swiftlint >/dev/null; then\n    swiftlint autocorrect && swiftlint\nelse\n    echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi";
 		};
+		4AEBD747ACEB6A1FB55E1F17 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ARDemoUITests/Pods-ARDemoUITests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		4C2DA6776F13E2002908D404 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		78288A88E62F51BB7148D5B7 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ARDemo/Pods-ARDemo-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		7A0772F76B3A5AADAFE2027F /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ARDemoUITests/Pods-ARDemoUITests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A15506316F8228A4DD97A715 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		AAEC9FDA4F62C45773A9797D /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ARDemo/Pods-ARDemo-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D1BFC9DF5F4546E08765CADD /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -302,13 +488,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5F11B0BF1F18A3430008F08A /* VODownloader.swift in Sources */,
+				5F11B0BD1F18A3430008F08A /* ARViewController.swift in Sources */,
 				4468724E1F14D06800146FC7 /* LineView.swift in Sources */,
-				446E3F5A1F14C15E005EE384 /* ViewController.swift in Sources */,
 				446E3F581F14C15E005EE384 /* AppDelegate.swift in Sources */,
 				440312BC1F14EACA0088DD05 /* Utilities.swift in Sources */,
 				448D20E71F15C9AA004C2101 /* Cup.swift in Sources */,
 				4468724C1F14CFB200146FC7 /* VirtualObject.swift in Sources */,
 				448D20E91F15C9C9004C2101 /* Jet.swift in Sources */,
+				5F11B0BE1F18A3430008F08A /* ARViewController+VirtualObjectManipulation.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -460,6 +648,7 @@
 		};
 		446E3F7D1F14C15E005EE384 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F9B1922ACC6A927F49AE4119 /* Pods-ARDemo.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -479,6 +668,7 @@
 		};
 		446E3F7E1F14C15E005EE384 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A611D6B2010727B07F397C63 /* Pods-ARDemo.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
@@ -498,6 +688,7 @@
 		};
 		446E3F801F14C15E005EE384 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 74E87FE90491E10D331FC2AF /* Pods-ARDemoTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -514,6 +705,7 @@
 		};
 		446E3F811F14C15E005EE384 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 76006A8AE38C06B4962E2C84 /* Pods-ARDemoTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -530,6 +722,7 @@
 		};
 		446E3F831F14C15E005EE384 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C213BBC7CE33F7E73242F0F0 /* Pods-ARDemoUITests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				DEVELOPMENT_TEAM = M7HB6C3N6X;
@@ -545,6 +738,7 @@
 		};
 		446E3F841F14C15E005EE384 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BCF6D9CCC4F1BC152AACDA94 /* Pods-ARDemoUITests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				DEVELOPMENT_TEAM = M7HB6C3N6X;
