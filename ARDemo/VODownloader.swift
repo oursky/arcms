@@ -15,6 +15,7 @@ class VODownloader: NSObject {
     private var loadedSCN = [URL]()
     private var loadingSCN = [URL]()
     private var loadedVO = [String: VirtualObject]()
+    private var invalidURL = [URL]()
 
     func downloadVirtualObject(url: URL, completion:@escaping (_ virtualObject: VirtualObject?) -> Void) {
         DispatchQueue.global().async {
@@ -34,6 +35,7 @@ class VODownloader: NSObject {
             self.downloadSCN(url: url, completion: { scene in
                 guard scene != nil else {
                     self.removeFromLoading(url: url)
+                    self.invalidURL.append(url)
                     completion(nil)
                     return
                 }
@@ -162,10 +164,7 @@ class VODownloader: NSObject {
         return !(loadingSCN.count == 0)
     }
 
-    //check whether the url is being loaded by the downloader,
-    //this can indicate whether the downloader is still attempting to download the file or not
-    //if not this is probably a wrong url
-    func isLoading(url: URL) -> Bool {
-        return loadingSCN.contains(url)
+    func isInvalid(url: URL) -> Bool {
+        return invalidURL.contains(url)
     }
 }
