@@ -10,6 +10,7 @@ import UIKit
 import SceneKit
 import ARKit
 import Vision
+import PKHUD
 
 class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
 
@@ -28,6 +29,9 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     var voDownloader = VODownloader()
 
     var recentVirtualObjectDistances = [CGFloat]()
+
+    // MARK: state
+    var debug = true
 
     // MARK: Core Image
     var qrDetector = CIDetector(ofType: CIDetectorTypeQRCode, context: nil, options: nil)
@@ -68,12 +72,6 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
             camera.minimumExposure = -1
         }
 
-        DispatchQueue.global().async {
-            self.virtualObject = Cup()
-            self.virtualObject?.loadModel()
-            self.virtualObject?.viewController = self
-        }
-
         enableEnvironmentMapWithIntensity(25.0)
     }
 
@@ -111,6 +109,7 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
             let retval = extractQRInfo(ciImage: ciImage)
             guard retval != nil else {
                 showIndicator(false)
+                HUD.hide(animated: true)
                 return
             }
 
@@ -125,17 +124,71 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
             print("centroid \(centroid)")
 
             if let url = URL(string: message) {
-                voDownloader.downloadVirtualObject(url: url, completion: { virtualObject in
-                    guard virtualObject != nil && !(self.virtualObject?.isEqual(virtualObject))! else { return }
-                    self.virtualObject?.removeFromParentNode()
-                    self.virtualObject = virtualObject
-                    self.virtualObject?.viewController = self
-                })
-                if virtualObject != nil && virtualObject?.modelName == url.pathComponents.last! {
+                let modelName = url.pathComponents.last!
+                if virtualObject != nil && virtualObject?.modelName == modelName {
                     renderVirtualObjectByScreenPos(screenPos: centroid, virtualObject: virtualObject)
+                } else {
+                    if !voDownloader.isLoading() && !voDownloader.isInvalid(url: url) {
+                        DispatchQueue.main.async {
+                            HUD.show(.progress)
+                        }
+                    }
+
+                    if voDownloader.isInvalid(url: url) {
+                        showInvalidError()
+                        return
+                    }
+
+                    print("Try download from \(url.absoluteString)")
+                    voDownloader.downloadVirtualObject(url: url, completion: { virtualObject in
+                        guard virtualObject != nil else {
+                            if self.virtualObject != nil && (self.virtualObject?.isEqual(virtualObject))! {
+                                return
+                            }
+
+                            if self.voDownloader.isInvalid(url: url) {
+                                DispatchQueue.main.async {
+                                    HUD.show(.labeledError(title: "Error", subtitle: "Fail to load the object"))
+                                }
+                            }
+                            return
+                        }
+                        print("[ARVC] Object loaded")
+                        self.virtualObject?.removeFromParentNode()
+                        self.virtualObject = virtualObject
+                        self.virtualObject?.viewController = self
+                        DispatchQueue.main.async {
+                            if virtualObject?.modelName != "" {
+                                let modelName = virtualObject?.modelName
+                                print(modelName!)
+                                HUD.flash(.labeledSuccess(title: "Sucess", subtitle: "\(modelName!) is loaded"), delay: 0.5)
+                            } else {
+                                HUD.flash(.success, delay: 0.5)
+                            }
+                        }
+                    })
                 }
+
             } else {
+                showNotURLError()
                 print("Incorrect url: \(message)")
+            }
+        }
+    }
+
+    // MARK: HUD wrap-up
+    private func showNotURLError() {
+        DispatchQueue.main.async {
+            if !HUD.isVisible {
+                HUD.show(.labeledError(title: "Error", subtitle: "This is not a url"))
+            }
+        }
+    }
+
+    private func showInvalidError() {
+        if !HUD.isVisible {
+            DispatchQueue.main.async {
+                HUD.show(.labeledError(title: "Error", subtitle: "Fail to load the object"))
             }
         }
     }
@@ -147,7 +200,6 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
 
         // currently only picking the fist qr code detected
         if let feature = (features?.first) as? CIQRCodeFeature {
-//            print("[QR] detected content \(feature.messageString)")
             guard feature.messageString != nil else { return nil }
             let topLeft = CGPoint(x: feature.topLeft.y/2, y: feature.topLeft.x/2)
             let topRight = CGPoint(x: feature.topRight.y/2, y: feature.topRight.x/2)
@@ -177,7 +229,6 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     // MARK: ARSCNViewDelegate
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
         DispatchQueue.main.async {
-
             // If light estimation is enabled, update the intensity of the model's lights and the environment map
             if let lightEstimate = self.session.currentFrame?.lightEstimate {
                 self.enableEnvironmentMapWithIntensity(lightEstimate.ambientIntensity / 100)
@@ -188,8 +239,13 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     }
 
     func showIndicator(_ show: Bool) {
-        lineView.isHidden = !show
-        centerPt.isHidden = !show
+        if debug {
+            lineView.isHidden = !show
+            centerPt.isHidden = !show
+        } else {
+            lineView.isHidden = true
+            centerPt.isHidden = true
+        }
     }
 
     func resetVirtualObject() {
