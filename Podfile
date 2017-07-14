@@ -6,6 +6,7 @@ target 'ARDemo' do
   use_frameworks!
 
   # Pods for ARDemo
+  pod 'Alamofire', '~> 4.4'
 
   target 'ARDemoTests' do
     inherit! :search_paths
