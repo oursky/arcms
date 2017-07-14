@@ -1,12 +1,25 @@
 PODS:
   - Alamofire (4.5.0)
+  - PKHUD (4.2.3)
 
 DEPENDENCIES:
   - Alamofire (~> 4.4)
+  - PKHUD (from `https://github.com/pkluz/PKHUD.git`, branch `release/swift4`)
+
+EXTERNAL SOURCES:
+  PKHUD:
+    :branch: release/swift4
+    :git: https://github.com/pkluz/PKHUD.git
+
+CHECKOUT OPTIONS:
+  PKHUD:
+    :commit: 3fb1f5325c3dc50adfe310ca0b859aa18bffd04b
+    :git: https://github.com/pkluz/PKHUD.git
 
 SPEC CHECKSUMS:
   Alamofire: f28cdffd29de33a7bfa022cbd63ae95a27fae140
+  PKHUD: 351011b853e6b942e7ee8ad335864cc84c787241
 
-PODFILE CHECKSUM: 808418fe25f646c67d332521259ce83f14f0aceb
+PODFILE CHECKSUM: aeb3a55fea722c9ef7ada6a96a0a90b16d4f5d42
 
 COCOAPODS: 1.2.1
