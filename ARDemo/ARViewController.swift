@@ -87,15 +87,6 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         restartPlaneDetection()
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-    }
-
-    override func viewDidLayoutSubviews() {
-//        print(view.frame)
-//        print(sceneView.frame)
-    }
-
     // MARK: Planes
     func restartPlaneDetection () {
         // configure session
@@ -118,7 +109,6 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
 
             let ciImage = CIImage(cvImageBuffer: frame.capturedImage)
             let retval = extractQRInfo(ciImage: ciImage)
-//            print("retval \(retval)")
             guard retval != nil else {
                 showIndicator(false)
                 return
@@ -135,17 +125,17 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
             print("centroid \(centroid)")
 
             if let url = URL(string: message) {
-                voDownloader.downloadSCN(url: url, completion: { virtualObject in
+                voDownloader.downloadVirtualObject(url: url, completion: { virtualObject in
+                    guard virtualObject != nil && !(self.virtualObject?.isEqual(virtualObject))! else { return }
                     self.virtualObject?.removeFromParentNode()
                     self.virtualObject = virtualObject
                     self.virtualObject?.viewController = self
                 })
+                if virtualObject != nil && virtualObject?.modelName == url.pathComponents.last! {
+                    renderVirtualObjectByScreenPos(screenPos: centroid, virtualObject: virtualObject)
+                }
             } else {
                 print("Incorrect url: \(message)")
-            }
-
-            if virtualObject != nil {
-                renderVirtualObjectByScreenPos(screenPos: centroid, virtualObject: virtualObject)
             }
         }
     }
