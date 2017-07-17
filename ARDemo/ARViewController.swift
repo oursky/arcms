@@ -11,6 +11,7 @@ import SceneKit
 import ARKit
 import Vision
 import PKHUD
+import Photos
 
 class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
 
@@ -31,7 +32,7 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     var recentVirtualObjectDistances = [CGFloat]()
 
     // MARK: state
-    var debug = true
+    var debug = false
 
     // MARK: Core Image
     var qrDetector = CIDetector(ofType: CIDetectorTypeQRCode, context: nil, options: nil)
@@ -39,28 +40,9 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view, typically from a nib.
-
-        sceneView = ARSCNView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height))
-        sceneView.showsStatistics = true
-        sceneView.delegate = self
-        session.delegate = self
-        sceneView.session = session
-
-        sceneView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(sceneView)
-
-        lineView = LineView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height))
-        lineView.backgroundColor = .clear
-        view.addSubview(lineView)
-
-        centerPt = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 10))
-        centerPt.backgroundColor = .red
-        centerPt.backgroundColor = centerPt.backgroundColor
-        centerPt.isHidden = true
-        view.addSubview(centerPt)
-
-        view.setNeedsUpdateConstraints()
+        sceneViewSetup()
+        debugIndicatorSetup()
+        photoTakingSetup()
 
         // Non-view setup
         imageRequestHandler = VNSequenceRequestHandler()
@@ -86,12 +68,51 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     }
 
     // MARK: Planes
-    func restartPlaneDetection () {
+    private func restartPlaneDetection () {
         // configure session
         if let worldSessionConfig = sessionConfig as? ARWorldTrackingSessionConfiguration {
             worldSessionConfig.planeDetection = .horizontal
             session.run(worldSessionConfig, options: [.resetTracking, .removeExistingAnchors])
         }
+    }
+
+    // MARK: View setup
+    private func sceneViewSetup() {
+        sceneView = ARSCNView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height))
+        sceneView.showsStatistics = debug
+        sceneView.delegate = self
+        session.delegate = self
+        sceneView.session = session
+
+        sceneView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(sceneView)
+    }
+
+    private func debugIndicatorSetup() {
+        lineView = LineView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height))
+        lineView.backgroundColor = .clear
+        view.addSubview(lineView)
+
+        centerPt = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 10))
+        centerPt.backgroundColor = .red
+        centerPt.backgroundColor = centerPt.backgroundColor
+        centerPt.isHidden = true
+        view.addSubview(centerPt)
+    }
+
+    private func photoTakingSetup() {
+        let button = UIButton(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
+        button.setImage(#imageLiteral(resourceName: "shutter"), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "shutterPressed"), for: .highlighted)
+        button.addTarget(self, action: #selector(takeScreenShot), for: .touchUpInside)
+        view.addSubview(button)
+
+        button.translatesAutoresizingMaskIntoConstraints = false
+        let buttonMargin = button.layoutMarginsGuide
+        let viewMargin = view.layoutMarginsGuide
+
+        buttonMargin.bottomAnchor.constraint(equalTo: viewMargin.bottomAnchor, constant: -25).isActive = true
+        buttonMargin.centerXAnchor.constraint(equalTo: viewMargin.centerXAnchor, constant: 0).isActive = true
     }
 
     // MARK: ARSessionDelegate
@@ -177,20 +198,21 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     }
 
     // MARK: HUD wrap-up
-    private func showNotURLError() {
+    private func showErrorHUD(title: String, subtitle: String) {
         DispatchQueue.main.async {
             if !HUD.isVisible {
-                HUD.show(.labeledError(title: "Error", subtitle: "This is not a url"))
+                HUD.show(.labeledError(title: title, subtitle: subtitle))
             }
         }
     }
 
+    private func showNotURLError() {
+        showErrorHUD(title: "Error", subtitle: "This is not a url")
+
+    }
+
     private func showInvalidError() {
-        if !HUD.isVisible {
-            DispatchQueue.main.async {
-                HUD.show(.labeledError(title: "Error", subtitle: "Fail to load the object"))
-            }
-        }
+        showErrorHUD(title: "Error", subtitle: "Fail to load the object")
     }
 
     // input the image and return the four corners (topLeft -> topRight -> bottomRight -> bottomLeft) and the decoded content of the qr code if any
@@ -259,5 +281,38 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         let position: SCNVector3?
         let planeAnchor: ARPlaneAnchor?
         let hitAPlane: Bool
+    }
+
+    // MARK: Photo taking
+    @objc func takeScreenShot(_ sender: UIButton) {
+        let takeScreenshotBlock = {
+            UIImageWriteToSavedPhotosAlbum(self.sceneView.snapshot(), nil, nil, nil)
+            DispatchQueue.main.async {
+                // Briefly flash the screen.
+                let flashOverlay = UIView(frame: self.sceneView.frame)
+                flashOverlay.backgroundColor = UIColor.white
+                self.sceneView.addSubview(flashOverlay)
+                UIView.animate(withDuration: 0.25, animations: {
+                    flashOverlay.alpha = 0.0
+                }, completion: { _ in
+                    flashOverlay.removeFromSuperview()
+                })
+            }
+        }
+
+        switch PHPhotoLibrary.authorizationStatus() {
+        case .authorized:
+            takeScreenshotBlock()
+        case .restricted, .denied:
+            let title = "Photos access denied"
+            let message = "Please enable Photos access for this application in Settings > Privacy to allow saving screenshots."
+            showErrorHUD(title: title, subtitle: message)
+        case .notDetermined:
+            PHPhotoLibrary.requestAuthorization({ (authorizationStatus) in
+                if authorizationStatus == .authorized {
+                    takeScreenshotBlock()
+                }
+            })
+        }
     }
 }
