@@ -12,16 +12,20 @@ import Alamofire
 
 class VODownloader: NSObject {
 
-    var loadedSCN = [URL]()
-    var loadingSCN = [URL]()
-    var loadedVO = [String: VirtualObject]()
+    private var loadedSCN = [URL]()
+    private var loadingSCN = [URL]()
+    private var loadedVO = [String: VirtualObject]()
+    private var invalidURL = [URL]()
 
     func downloadVirtualObject(url: URL, completion:@escaping (_ virtualObject: VirtualObject?) -> Void) {
         DispatchQueue.global().async {
             guard !self.loadingSCN.contains(url) && !self.loadedSCN.contains(url)
                 else {
                     if self.loadedSCN.contains(url) {
+                        print("[VODownloader] Cached object")
                         completion(self.loadedVO[url.absoluteString])
+                    } else {
+                        completion(nil)
                     }
                     return
             }
@@ -30,11 +34,14 @@ class VODownloader: NSObject {
 
             self.downloadSCN(url: url, completion: { scene in
                 guard scene != nil else {
+                    self.removeFromLoading(url: url)
+                    self.invalidURL.append(url)
                     completion(nil)
                     return
                 }
                 let virtualObject = VirtualObject()
                 virtualObject.modelName = url.pathComponents.last!
+                print("Model name \(virtualObject.modelName)")
                 virtualObject.loadModel(scene!)
                 self.loadedSCN.append(url)
                 self.loadedVO[url.absoluteString] = virtualObject
@@ -85,7 +92,13 @@ class VODownloader: NSObject {
                             completion(nil)
                         }
                     })
+                } else {
+                    print("No \"textures\" entry in the returned json")
+                    completion(nil)
                 }
+            } else {
+                print("Unable to receive the texture json from \(url.absoluteString)")
+                completion(nil)
             }
         }
     }
@@ -145,5 +158,13 @@ class VODownloader: NSObject {
             print("Error in downloading textures: \(error)")
             completion(false)
         }
+    }
+
+    func isLoading() -> Bool {
+        return !(loadingSCN.count == 0)
+    }
+
+    func isInvalid(url: URL) -> Bool {
+        return invalidURL.contains(url)
     }
 }

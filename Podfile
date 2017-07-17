@@ -7,6 +7,7 @@ target 'ARDemo' do
 
   # Pods for ARDemo
   pod 'Alamofire', '~> 4.4'
+  pod 'PKHUD', :git => 'https://github.com/pkluz/PKHUD.git', :branch => 'release/swift4'
 
   target 'ARDemoTests' do
     inherit! :search_paths
