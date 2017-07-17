@@ -19,22 +19,23 @@ class VODownloader: NSObject {
 
     func downloadVirtualObject(url: URL, completion:@escaping (_ virtualObject: VirtualObject?) -> Void) {
         DispatchQueue.global().async {
-            guard !self.loadingSCN.contains(url) && !self.loadedSCN.contains(url)
-                else {
-                    if self.loadedSCN.contains(url) {
-                        print("[VODownloader] Cached object")
-                        completion(self.loadedVO[url.absoluteString])
-                    } else {
-                        completion(nil)
-                    }
-                    return
+            guard !self.loadingSCN.contains(url) else {
+                completion(nil)
+                return
             }
+
+            guard !self.loadedSCN.contains(url) else {
+                print("[VODownloader] Cached object")
+                completion(self.loadedVO[url.absoluteString])
+                return
+            }
+
             print("Start downloading the scn file from \(url.absoluteString)")
-            self.loadingSCN.append(url)
+            self.startLoading(url: url)
 
             self.downloadSCN(url: url, completion: { scene in
                 guard scene != nil else {
-                    self.removeFromLoading(url: url)
+                    self.endLoading(url: url)
                     self.invalidURL.append(url)
                     completion(nil)
                     return
@@ -45,118 +46,128 @@ class VODownloader: NSObject {
                 virtualObject.loadModel(scene!)
                 self.loadedSCN.append(url)
                 self.loadedVO[url.absoluteString] = virtualObject
-                self.removeFromLoading(url: url)
+                self.endLoading(url: url)
                 completion(virtualObject)
             })
         }
     }
 
-    private func removeFromLoading(url: URL) {
-        let i = self.loadingSCN.index(of: url)
+    private func startLoading(url: URL) {
+        loadingSCN.append(url)
+    }
+
+    private func endLoading(url: URL) {
+        let i = loadingSCN.index(of: url)
         if i != nil {
-            self.loadingSCN.remove(at: i!)
+            loadingSCN.remove(at: i!)
         }
     }
 
-    //Assumption: the url must be in this format http://$host/$fileID (this link retursn a json containing the names of all texture files)
+    // Assumption: the url must be in this format http://$host/$fileID
+    // (this link returns a json containing the paths to all texture files as well as the .scn file)
     // loand the scn file in http://$host/$fileID/$fileID.scn while the textures in http://$host/$fileID/textures
     private func downloadSCN(url: URL, completion:@escaping (_ scn: SCNScene?) -> Void) {
         Alamofire.request(url).responseJSON { response in
-            if let json = response.result.value as! [String: [String]]? {
-                if let textures = json["textures"] {
-                    print(textures)
-                    let filemgr = FileManager.default
-                    let docPath = filemgr.urls(for: .documentDirectory, in: .userDomainMask).last
-
-                    self.downloadTextures(textures, remoteRootURL: url, completion: { sucess in
-                        if sucess {
-                            let filename = "\(url.pathComponents.last!).scn"
-                            let scnURL = url.appendingPathComponent(filename)
-                            Alamofire.request(scnURL).responseData { response in
-                                if response.data != nil {
-                                    do {
-                                        let scnSaveURL = docPath?.appendingPathComponent(filename)
-                                        try response.data?.write(to: scnSaveURL!, options: .atomicWrite)
-                                        let localScnURL = docPath?.appendingPathComponent(filename)
-                                        let scnFile = try SCNScene(url: localScnURL!)
-                                        completion(scnFile)
-                                        return
-                                    } catch let error as NSError {
-                                        completion(nil)
-                                        print("Error in writing/reading scn file: \(error)")
-                                        return
-                                    }
-                                }
-                            }
-                        } else {
-                            completion(nil)
-                        }
-                    })
-                } else {
-                    print("No \"textures\" entry in the returned json")
-                    completion(nil)
-                }
-            } else {
+            guard let json = response.result.value as! [String: Any]? else {
                 print("Unable to receive the texture json from \(url.absoluteString)")
                 completion(nil)
+                return
+            }
+            guard var filesToDownload = json["textures"] as? [String] else {
+                print("No \"textures\" entry in the returned json")
+                completion(nil)
+                return
+            }
+
+            guard let scnFilename = json["scn"] as? String else {
+                completion(nil)
+                return
+            }
+
+            let (docURL, textureURL) = self.prepareDirs()
+
+            guard docURL != nil && textureURL != nil else {
+                completion(nil)
+                return
+            }
+
+            filesToDownload.append(scnFilename)
+            print(filesToDownload)
+
+            self.downloadFiles(filesToDownload, from: url, to: docURL!) { success in
+                if !success {
+                    completion(nil)
+                }
+
+                let scnSaveURL = docURL?.appendingPathComponent(scnFilename)
+                self.loadScn(scnURL: scnSaveURL!) { scn in
+                    completion(scn)
+                }
             }
         }
     }
 
-    private func downloadFile(from source: URL, to destination: URL, completion:@escaping (_ successful: Bool) -> Void) {
+    private func prepareDirs() -> (docUrl: URL?, textureURL: URL?) {
+        let filemgr = FileManager.default
+        let docURL = filemgr.urls(for: .documentDirectory, in: .userDomainMask).last
+        let textureURL = docURL?.appendingPathComponent("textures", isDirectory: true)
+        var isDir: ObjCBool = false
+        if filemgr.fileExists(atPath: (textureURL?.path)!, isDirectory: &isDir) { try? filemgr.removeItem(at: textureURL!) }
+        do {
+            try filemgr.createDirectory(at: textureURL!, withIntermediateDirectories: false, attributes: nil)
+        } catch let error {
+            print("Fail to create directory at \(textureURL!)\n Error: \(error)")
+            return (nil, nil)
+        }
 
-        Alamofire.request(source).responseData { response in
+        return (docURL, textureURL)
+    }
+
+    private func loadScn(scnURL: URL, completion:@escaping (_ scn: SCNScene?) -> Void) {
+        do {
+            let scnFile = try SCNScene(url: scnURL)
+            completion(scnFile)
+        } catch let error {
+            completion(nil)
+            print("Error in writing/reading scn file: \(error)")
+        }
+    }
+
+    private func downloadFile(from src: URL,
+                              to dest: URL,
+                              completion:@escaping (_ successful: Bool) -> Void) {
+        Alamofire.request(src).responseData { response in
             do {
-                try response.data?.write(to: destination, options: .atomicWrite)
+                try response.data?.write(to: dest, options: .atomicWrite)
                 completion(true)
-            } catch let error as NSError {
-                print("Error in downloadFile from \(source.absoluteString) to \(destination.absoluteString): \(error)")
+            } catch let error {
+                print("Error in downloadFile from \(src.absoluteString) to \(dest.absoluteString): \(error)")
                 completion(false)
             }
         }
-
     }
 
-    private func downloadTexture(_ textureFilename: String,
-                                 _ remoteRootURL: URL, to destination: URL,
-                                 completion:@escaping(_ successful: Bool) -> Void) {
-        let textureURL = remoteRootURL.appendingPathComponent(textureFilename)
-        print("Downloading texture \(textureFilename) from \(textureURL.absoluteString)")
-        downloadFile(from: textureURL, to: destination) { success in
-            completion(success)
-        }
-
-    }
-
-    private func downloadTextures(_ textures: [String], remoteRootURL: URL, completion:@escaping(_ successful: Bool) -> Void) {
-        do {
-            let filemgr = FileManager.default
-            let docPath = filemgr.urls(for: .documentDirectory, in: .userDomainMask).last
-            let textureURL = docPath?.appendingPathComponent("textures", isDirectory: true)
-            var isDir: ObjCBool = false
-            if filemgr.fileExists(atPath: (textureURL?.path)!, isDirectory: &isDir) { try filemgr.removeItem(at: textureURL!) }
-            try filemgr.createDirectory(at: textureURL!, withIntermediateDirectories: false, attributes: nil)
-            var count = 0
-            for texture in textures {
-                let destination = textureURL?.appendingPathComponent(texture)
-                downloadTexture(texture,
-                                remoteRootURL.appendingPathComponent("textures", isDirectory: true),
-                                to: destination!,
-                                completion: { success in
-                    if !success {
-                        print("Fail to download \(texture)")
-                        completion(false)
-                        return
-                    }
-                    count += 1
-                    if count >= textures.count {
-                        completion(success)
-                    }
-                })
+    private func downloadFiles(_ files: [String],
+                               from  srcRootURL: URL,
+                               to destRootURL: URL,
+                               completion:@escaping(_ successful: Bool) -> Void) {
+        var count = 0
+        var errCount = 0
+        for file in files {
+            let src = srcRootURL.appendingPathComponent(file)
+            let dest = destRootURL.appendingPathComponent(file)
+            downloadFile(from: src, to: dest) { success in
+                if !success {
+                    errCount += 1
+                    print("Fail to download \(src)")
+                    completion(false)
+                    return
+                }
+                count += 1
+                if count >= files.count {
+                    if errCount == 0 { completion(success) }
+                }
             }
-        } catch let error as NSError {
-            print("Error in downloading textures: \(error)")
-            completion(false)
         }
     }
 
