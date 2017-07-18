@@ -31,6 +31,11 @@ class VODownloader: NSObject {
             }
 
             print("Start downloading the scn file from \(url.absoluteString)")
+            guard !self.isInvalid(url: url) else {
+                print("Invalid url \(url.absoluteString)")
+                completion(nil)
+                return
+            }
             self.startLoading(url: url)
 
             self.downloadSCN(url: url, completion: { scene in
@@ -171,11 +176,11 @@ class VODownloader: NSObject {
         }
     }
 
-    func isLoading() -> Bool {
-        return !(loadingSCN.count == 0)
+    private func isInvalid(url: URL) -> Bool {
+        return invalidURL.contains(url)
     }
 
-    func isInvalid(url: URL) -> Bool {
-        return invalidURL.contains(url)
+    func isLoading() -> Bool {
+        return !(loadingSCN.count == 0)
     }
 }

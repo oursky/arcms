@@ -33,6 +33,7 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
 
     // MARK: state
     var debug = false
+    var currentHUD = "none"
 
     // MARK: Core Image
     var qrDetector = CIDetector(ofType: CIDetectorTypeQRCode, context: nil, options: nil)
@@ -122,97 +123,104 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
 
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
         counter = (counter + 1) % checkInterval
+        guard counter == 0 else { return }
 
-        if counter == 0 {
-            print("searching for QR code")
+        print("searching for QR code")
 
-            let ciImage = CIImage(cvImageBuffer: frame.capturedImage)
-            let retval = extractQRInfo(ciImage: ciImage)
-            guard retval != nil else {
-                showIndicator(false)
-                HUD.hide(animated: true)
+        let ciImage = CIImage(cvImageBuffer: frame.capturedImage)
+        let retval = extractQRInfo(ciImage: ciImage)
+        guard retval != nil else {
+            showIndicator(false)
+            hideHUD()
+            return
+        }
+
+        let (corners, message) = retval!
+        print("corners \(corners)")
+        print("message \(message)")
+        updateDebugUI(corners)
+
+        guard let url = URL(string: message) else {
+            showNotURLError()
+            print("Incorrect url: \(message)")
+            return
+        }
+
+        let modelName = url.pathComponents.last!
+        if virtualObject?.modelName == modelName {
+            let centroid = Utilities.intersection(u1: corners[0], u2: corners[2], v1: corners[1], v2: corners[3])
+            print("put virutal object at centroid \(centroid)")
+            renderVirtualObjectByScreenPos(screenPos: centroid, virtualObject: virtualObject)
+            return
+        }
+
+        if voDownloader.isLoading() {
+            showProgressHUD()
+            return
+        }
+
+        voDownloader.downloadVirtualObject(url: url, completion: { virtualObject in
+            guard virtualObject != nil else {
+                self.showUnableToLoadError()
                 return
             }
 
-            showIndicator(true)
-            let (corners, message) = retval!
-            print("corners \(corners)")
-            print("message \(message)")
+            self.flashSuccessHUD(modelName: (virtualObject?.modelName)!)
+            self.loadViruatlObject(virtualObject!)
+            print("[ARVC] Object loaded")
+        })
+    }
 
-            drawFocusSquare(corners: corners)
-
-            let centroid = Utilities.intersection(u1: corners[0], u2: corners[2], v1: corners[1], v2: corners[3])
-            print("centroid \(centroid)")
-
-            if let url = URL(string: message) {
-                let modelName = url.pathComponents.last!
-                if virtualObject != nil && virtualObject?.modelName == modelName {
-                    renderVirtualObjectByScreenPos(screenPos: centroid, virtualObject: virtualObject)
-                } else {
-                    if !voDownloader.isLoading() && !voDownloader.isInvalid(url: url) {
-                        DispatchQueue.main.async {
-                            HUD.show(.progress)
-                        }
-                    }
-
-                    if voDownloader.isInvalid(url: url) {
-                        showInvalidError()
-                        return
-                    }
-
-                    print("Try download from \(url.absoluteString)")
-                    voDownloader.downloadVirtualObject(url: url, completion: { virtualObject in
-                        guard virtualObject != nil else {
-                            if self.virtualObject != nil && (self.virtualObject?.isEqual(virtualObject))! {
-                                return
-                            }
-
-                            if self.voDownloader.isInvalid(url: url) {
-                                DispatchQueue.main.async {
-                                    HUD.show(.labeledError(title: "Error", subtitle: "Fail to load the object"))
-                                }
-                            }
-                            return
-                        }
-                        print("[ARVC] Object loaded")
-                        self.virtualObject?.removeFromParentNode()
-                        self.virtualObject = virtualObject
-                        self.virtualObject?.viewController = self
-                        DispatchQueue.main.async {
-                            if virtualObject?.modelName != "" {
-                                let modelName = virtualObject?.modelName
-                                print(modelName!)
-                                HUD.flash(.labeledSuccess(title: "Sucess", subtitle: "\(modelName!) is loaded"), delay: 0.5)
-                            } else {
-                                HUD.flash(.success, delay: 0.5)
-                            }
-                        }
-                    })
-                }
-
-            } else {
-                showNotURLError()
-                print("Incorrect url: \(message)")
-            }
-        }
+    private func loadViruatlObject(_ virtualObject: VirtualObject) {
+        self.virtualObject?.removeFromParentNode()
+        self.virtualObject = virtualObject
+        self.virtualObject?.viewController = self
     }
 
     // MARK: HUD wrap-up
     private func showErrorHUD(title: String, subtitle: String) {
         DispatchQueue.main.async {
-            if !HUD.isVisible {
-                HUD.show(.labeledError(title: title, subtitle: subtitle))
-            }
+            HUD.show(.labeledError(title: title, subtitle: subtitle))
         }
     }
 
     private func showNotURLError() {
+        guard currentHUD != "not_url" else { return }
+        currentHUD = "not_url"
         showErrorHUD(title: "Error", subtitle: "This is not a url")
 
     }
 
-    private func showInvalidError() {
+    private func showUnableToLoadError() {
+        guard currentHUD != "invalid_url" else { return }
+        currentHUD = "invalid_url"
         showErrorHUD(title: "Error", subtitle: "Fail to load the object")
+    }
+
+    private func showProgressHUD() {
+        guard currentHUD != "progress" else { return }
+        currentHUD = "progress"
+        DispatchQueue.main.async {
+            HUD.show(.progress)
+        }
+    }
+
+    private func hideHUD() {
+        currentHUD = "none"
+        DispatchQueue.main.async {
+            HUD.hide()
+        }
+    }
+
+    private func flashSuccessHUD(modelName: String) {
+        DispatchQueue.main.async {
+            if modelName != "" {
+                print(modelName)
+                HUD.flash(.labeledSuccess(title: "Success", subtitle: "\(modelName) is loaded"), delay: 0.5)
+            } else {
+                HUD.flash(.success, delay: 0.5)
+            }
+        }
     }
 
     // input the image and return the four corners (topLeft -> topRight -> bottomRight -> bottomLeft) and the decoded content of the qr code if any
@@ -260,14 +268,14 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         }
     }
 
-    func showIndicator(_ show: Bool) {
-        if debug {
-            lineView.isHidden = !show
-            centerPt.isHidden = !show
-        } else {
-            lineView.isHidden = true
-            centerPt.isHidden = true
-        }
+    private func showIndicator(_ show: Bool) {
+        lineView.isHidden = !show
+        centerPt.isHidden = !show
+    }
+
+    private func updateDebugUI(_ corners: [CGPoint]) {
+        showIndicator(debug)
+        drawFocusSquare(corners: corners)
     }
 
     func resetVirtualObject() {
