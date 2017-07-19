@@ -150,7 +150,7 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         if virtualObject?.modelName == modelName {
             let centroid = Utilities.intersection(u1: corners[0], u2: corners[2], v1: corners[1], v2: corners[3])
             print("put virutal object at centroid \(centroid)")
-            renderVirtualObjectByScreenPos(screenPos: centroid, virtualObject: virtualObject)
+            moveVirtualObjectToScreenPos(virtualObject, to: centroid, infinitePlane: false)
             return
         }
 
@@ -174,7 +174,6 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     private func loadViruatlObject(_ virtualObject: VirtualObject) {
         self.virtualObject?.removeFromParentNode()
         self.virtualObject = virtualObject
-        self.virtualObject?.viewController = self
     }
 
     // MARK: HUD wrap-up
@@ -246,14 +245,6 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         let centroid = Utilities.intersection(u1: corners[0], u2: corners[2], v1: corners[1], v2: corners[3])
         centerPt.frame = CGRect(x: centroid.x, y: centroid.y, width: 5, height: 5)
         lineView.setPoints(corners)
-    }
-
-    func renderVirtualObjectByScreenPos(screenPos: CGPoint, virtualObject: VirtualObject?) {
-        guard virtualObject != nil else {return}
-
-        if !(virtualObject?.modelLoaded)! { virtualObject?.loadModel() }
-
-        virtualObject?.translateBasedOnScreenPos(screenPos, instantly: true, infinitePlane: false)
     }
 
     // MARK: ARSCNViewDelegate

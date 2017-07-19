@@ -16,8 +16,6 @@ class VirtualObject: SCNNode {
     var fileExtension: String = ""
     var modelLoaded: Bool = false
 
-    var viewController: ARViewController?
-
     override init() {
         super.init()
         self.name = "Virtual object root node"
@@ -73,16 +71,5 @@ class VirtualObject: SCNNode {
         }
 
         modelLoaded = false
-    }
-
-    func translateBasedOnScreenPos(_ pos: CGPoint, instantly: Bool, infinitePlane: Bool) {
-
-        guard let controller = viewController else {
-            return
-        }
-
-        let result = controller.worldPositionFromScreenPosition(pos, objectPos: self.position, infinitePlane: infinitePlane)
-
-        controller.moveVirtualObjectToPosition(result.position, instantly, !result.hitAPlane)
     }
 }
