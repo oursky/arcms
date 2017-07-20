@@ -22,6 +22,14 @@ class Utilities: NSObject {
 
 }
 
+extension CGPoint {
+    static func distance(_ a: CGPoint, _ b: CGPoint) -> CGFloat {
+        let xDist = a.x - b.x
+        let yDist = a.y - b.y
+        return CGFloat(sqrt((xDist * xDist) + (yDist * yDist)))
+    }
+}
+
 extension SCNVector3 {
 
     func length() -> Float {
@@ -55,6 +63,12 @@ extension SCNVector3 {
 
     func cross(_ vec: SCNVector3) -> SCNVector3 {
         return SCNVector3(self.y * vec.z - self.z * vec.y, self.z * vec.x - self.x * vec.z, self.x * vec.y - self.y * vec.x)
+    }
+    
+    static func distance(_ v1:SCNVector3, _ v2:SCNVector3) -> Float {
+        let vd = v1-v2
+        let dist = vd.dot(vd)
+        return dist
     }
 
     mutating func setMaximumLength(_ maxLength: Float) {
