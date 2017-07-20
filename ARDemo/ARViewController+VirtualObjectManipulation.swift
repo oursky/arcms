@@ -186,11 +186,12 @@ extension ARViewController {
 
         let result = worldPositionFromScreenPosition(screenPos, objectPos: virtualObject?.position, infinitePlane: infinitePlane)
 
-        var instantly = true
+        // Bug here, switch to true, and fix it later
+        let instantly = true
         if result.position != nil && virtualObject?.position != nil {
             let distance = SCNVector3.distance(result.position!, (virtualObject?.position)!)*1000
             print("Distance of \(String(describing: virtualObject?.modelName)) to destination: \(distance)")
-            if distance <= 0.5 { instantly = false }
+//            if distance <= 0.5 { instantly = false }
         }
 
         moveVirtualObjectToPosition(result.position, instantly, !result.hitAPlane)

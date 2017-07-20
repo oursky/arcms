@@ -17,6 +17,9 @@ class VODownloader: NSObject {
     private var loadedVO = [String: VirtualObject]()
     private var invalidURL = [URL]()
 
+    // unit: MB
+    private var cacheSize = 50.0
+
     func downloadVirtualObject(url: URL, completion:@escaping (_ virtualObject: VirtualObject?) -> Void) {
         DispatchQueue.global().async {
             guard !self.loadingSCN.contains(url) else {
@@ -54,6 +57,8 @@ class VODownloader: NSObject {
                 self.endLoading(url: url)
                 completion(virtualObject)
             })
+
+            self.updateCacheInDisk()
         }
     }
 
@@ -65,6 +70,41 @@ class VODownloader: NSObject {
         let i = loadingSCN.index(of: url)
         if i != nil {
             loadingSCN.remove(at: i!)
+        }
+    }
+
+    private func updateCacheInDisk() {
+        let filemgr = FileManager.default
+        let docURL = filemgr.urls(for: .documentDirectory, in: .userDomainMask).last
+        do {
+            let fileSize = try Double(filemgr.allocatedSizeOfDirectory(atUrl: docURL!))/1000000
+            print("Cached files size in disk: \(String(describing: fileSize)) MB")
+            if fileSize > cacheSize {
+                print("Exceed cache size limit, cleaning up some files")
+                try cleanCacheInDisk(proportion: 0.5)
+            }
+        } catch {
+            print("Error in updating cache \((docURL?.absoluteString)!).\n Error: \(error)")
+        }
+    }
+
+    private func cleanCacheInDisk(proportion: Double) throws {
+        let filemgr = FileManager.default
+        let docURL = filemgr.urls(for: .documentDirectory, in: .userDomainMask).last
+        let filesArray = try filemgr.contentsOfDirectory(at: docURL!,
+                                                         includingPropertiesForKeys: [.isDirectoryKey],
+                                                         options: .skipsHiddenFiles)
+        print("Files in disk cache \(filesArray)")
+        var count = 0
+        for file in filesArray {
+            if Double(count) >= Double(filesArray.count)*proportion { break }
+            do {
+                print("Removing file at \(file.absoluteString)")
+                try filemgr.removeItem(at: file)
+            } catch {
+                print("Error in removing file at \(file.absoluteString)\nError: \(error)")
+            }
+            count += 1
         }
     }
 
