@@ -18,7 +18,7 @@ class VODownloader: NSObject {
     private var invalidURL = [URL]()
 
     // unit: MB
-    private var cacheSize = 50.0
+    private var cacheSize = 5.0
 
     func downloadVirtualObject(url: URL, completion:@escaping (_ virtualObject: VirtualObject?) -> Void) {
         DispatchQueue.global().async {
@@ -56,9 +56,9 @@ class VODownloader: NSObject {
                 self.loadedVO[url.absoluteString] = virtualObject
                 self.endLoading(url: url)
                 completion(virtualObject)
-            })
 
-            self.updateCacheInDisk()
+                self.updateCacheInDisk()
+            })
         }
     }
 
@@ -77,27 +77,43 @@ class VODownloader: NSObject {
         let filemgr = FileManager.default
         let docURL = filemgr.urls(for: .documentDirectory, in: .userDomainMask).last
         do {
-            let fileSize = try Double(filemgr.allocatedSizeOfDirectory(atUrl: docURL!))/1000000
+            let fileSize = getFileSizeInMB(ofURL: docURL!)
             print("Cached files size in disk: \(String(describing: fileSize)) MB")
             if fileSize > cacheSize {
                 print("Exceed cache size limit, cleaning up some files")
-                try cleanCacheInDisk(proportion: 0.5)
+                try cleanCacheInDisk()
             }
         } catch {
             print("Error in updating cache \((docURL?.absoluteString)!).\n Error: \(error)")
         }
     }
 
-    private func cleanCacheInDisk(proportion: Double) throws {
+    private func cleanCacheInDisk() throws {
         let filemgr = FileManager.default
         let docURL = filemgr.urls(for: .documentDirectory, in: .userDomainMask).last
-        let filesArray = try filemgr.contentsOfDirectory(at: docURL!,
-                                                         includingPropertiesForKeys: [.isDirectoryKey],
+        var filesArray = try filemgr.contentsOfDirectory(at: docURL!,
+                                                         includingPropertiesForKeys: [.isDirectoryKey, .contentAccessDateKey],
                                                          options: .skipsHiddenFiles)
+
+        do {
+            filesArray = try filesArray.sorted { (first, second) -> Bool in
+                let firstDateKey = try first.resourceValues(forKeys: [.contentAccessDateKey])
+                let firstAccessDate = firstDateKey.contentAccessDate
+
+                let secondDateKey = try second.resourceValues(forKeys: [.contentAccessDateKey])
+                let secondAccessDate = secondDateKey.contentAccessDate
+
+                return firstAccessDate! < secondAccessDate!
+            }
+        } catch {
+            print("Error in sorting file array by date.\nError: \(error)")
+        }
+
         print("Files in disk cache \(filesArray)")
+
         var count = 0
-        for file in filesArray {
-            if Double(count) >= Double(filesArray.count)*proportion { break }
+        while count < filesArray.count || getFileSizeInMB(ofURL: docURL!) > cacheSize {
+            let file = filesArray[count]
             do {
                 print("Removing file at \(file.absoluteString)")
                 try filemgr.removeItem(at: file)
@@ -105,6 +121,15 @@ class VODownloader: NSObject {
                 print("Error in removing file at \(file.absoluteString)\nError: \(error)")
             }
             count += 1
+        }
+    }
+
+    private func getFileSizeInMB(ofURL url: URL) -> Double {
+        do {
+            return try Double(FileManager.default.allocatedSizeOfDirectory(atUrl: url))/1000000
+        } catch {
+            print("Error in getting file size of \(url.absoluteString)")
+            return 0.0
         }
     }
 
@@ -172,8 +197,7 @@ class VODownloader: NSObject {
         // if the both directories exist, it implies that the file has been downloaded -> return the urls
         // if only root diretory exists but not texture directory, the file was downloaded incompletely, remove them and re-download
         if filemgr.fileExists(atPath: (parentURL?.path)!) {
-            if filemgr.fileExists(atPath: (textureURL?.path)!) { return (parentURL, textureURL) }
-            else { try? filemgr.removeItem(at: parentURL!) }
+            if filemgr.fileExists(atPath: (textureURL?.path)!) { return (parentURL, textureURL) } else { try? filemgr.removeItem(at: parentURL!) }
         }
         do {
             try filemgr.createDirectory(at: parentURL!, withIntermediateDirectories: false, attributes: nil)
