@@ -18,7 +18,7 @@ class VODownloader: NSObject {
     private var invalidURL = [URL]()
 
     // unit: MB
-    private var cacheSize = 5.0
+    private var cacheSize = 50.0
 
     func downloadVirtualObject(url: URL, completion:@escaping (_ virtualObject: VirtualObject?) -> Void) {
         DispatchQueue.global().async {
@@ -96,15 +96,7 @@ class VODownloader: NSObject {
                                                          options: .skipsHiddenFiles)
 
         do {
-            filesArray = try filesArray.sorted { (first, second) -> Bool in
-                let firstDateKey = try first.resourceValues(forKeys: [.contentAccessDateKey])
-                let firstAccessDate = firstDateKey.contentAccessDate
-
-                let secondDateKey = try second.resourceValues(forKeys: [.contentAccessDateKey])
-                let secondAccessDate = secondDateKey.contentAccessDate
-
-                return firstAccessDate! < secondAccessDate!
-            }
+            filesArray = try sortByDate(ofFiles: filesArray)
         } catch {
             print("Error in sorting file array by date.\nError: \(error)")
         }
@@ -124,6 +116,18 @@ class VODownloader: NSObject {
         }
     }
 
+    private func sortByDate(ofFiles files: [URL]) throws -> [URL] {
+         return try files.sorted { (first, second) -> Bool in
+            let firstDateKey = try first.resourceValues(forKeys: [.contentAccessDateKey])
+            let firstAccessDate = firstDateKey.contentAccessDate
+
+            let secondDateKey = try second.resourceValues(forKeys: [.contentAccessDateKey])
+            let secondAccessDate = secondDateKey.contentAccessDate
+
+            return firstAccessDate! < secondAccessDate!
+        }
+    }
+
     private func getFileSizeInMB(ofURL url: URL) -> Double {
         do {
             return try Double(FileManager.default.allocatedSizeOfDirectory(atUrl: url))/1000000
@@ -138,7 +142,8 @@ class VODownloader: NSObject {
     // loand the scn file in http://$host/$fileID/$fileID.scn while the textures in http://$host/$fileID/textures
     private func downloadSCN(url: URL, completion:@escaping (_ scn: SCNScene?) -> Void) {
         let modelName = url.pathComponents.last!
-        let (parentURL, textureURL) = self.prepareDirs(parentDir:modelName)
+        let hash = String(url.absoluteString.hash)
+        let (parentURL, textureURL) = self.prepareDirs(parentDir:hash)
 
         guard parentURL != nil && textureURL != nil else {
             completion(nil)
