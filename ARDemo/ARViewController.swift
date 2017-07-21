@@ -20,9 +20,6 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     var session = ARSession()
     var sessionConfig: ARSessionConfiguration = ARWorldTrackingSessionConfiguration()
 
-    // MARK: Vision
-    var imageRequestHandler: VNSequenceRequestHandler!
-
     var lineView: LineView!
     var centerPt: UIView!
 
@@ -46,8 +43,6 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         photoTakingSetup()
 
         // Non-view setup
-        imageRequestHandler = VNSequenceRequestHandler()
-
         if let camera = sceneView.pointOfView?.camera {
             camera.wantsHDR = true
             camera.wantsExposureAdaptation = true
@@ -119,7 +114,7 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     // MARK: ARSessionDelegate
     var counter: Int = 0
     // check once after this interval
-    var checkInterval = 10
+    var checkInterval = 5
 
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
         counter = (counter + 1) % checkInterval
@@ -138,6 +133,7 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         let (corners, message) = retval!
         print("corners \(corners)")
         print("message \(message)")
+
         updateDebugUI(corners)
 
         guard let url = URL(string: message) else {
@@ -150,7 +146,7 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         if virtualObject?.modelName == modelName {
             let centroid = Utilities.intersection(u1: corners[0], u2: corners[2], v1: corners[1], v2: corners[3])
             print("put virutal object at centroid \(centroid)")
-            renderVirtualObjectByScreenPos(screenPos: centroid, virtualObject: virtualObject)
+            moveVirtualObjectToScreenPos(virtualObject, to: centroid, infinitePlane: false)
             return
         }
 
@@ -174,7 +170,6 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     private func loadViruatlObject(_ virtualObject: VirtualObject) {
         self.virtualObject?.removeFromParentNode()
         self.virtualObject = virtualObject
-        self.virtualObject?.viewController = self
     }
 
     // MARK: HUD wrap-up
@@ -242,20 +237,6 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         }
     }
 
-    func drawFocusSquare(corners: [CGPoint]) {
-        let centroid = Utilities.intersection(u1: corners[0], u2: corners[2], v1: corners[1], v2: corners[3])
-        centerPt.frame = CGRect(x: centroid.x, y: centroid.y, width: 5, height: 5)
-        lineView.setPoints(corners)
-    }
-
-    func renderVirtualObjectByScreenPos(screenPos: CGPoint, virtualObject: VirtualObject?) {
-        guard virtualObject != nil else {return}
-
-        if !(virtualObject?.modelLoaded)! { virtualObject?.loadModel() }
-
-        virtualObject?.translateBasedOnScreenPos(screenPos, instantly: true, infinitePlane: false)
-    }
-
     // MARK: ARSCNViewDelegate
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
         DispatchQueue.main.async {
@@ -276,6 +257,26 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     private func updateDebugUI(_ corners: [CGPoint]) {
         showIndicator(debug)
         drawFocusSquare(corners: corners)
+    }
+
+    private func updateDebugUI(boundingBox: CGRect) {
+        showIndicator(debug)
+        drawFocusSquare(boundingBox: boundingBox)
+    }
+
+    private func drawFocusSquare(corners: [CGPoint]) {
+        let centroid = Utilities.intersection(u1: corners[0], u2: corners[2], v1: corners[1], v2: corners[3])
+        centerPt.frame = CGRect(x: centroid.x, y: centroid.y, width: 5, height: 5)
+        lineView.setPoints(corners)
+    }
+
+    private func drawFocusSquare(boundingBox: CGRect) {
+        let topLeft = boundingBox.origin
+        let topRight = CGPoint(x: topLeft.x+boundingBox.width, y: topLeft.y)
+        let bottomLeft = CGPoint(x: topLeft.x, y: topLeft.y+boundingBox.height)
+        let bottomRight = CGPoint(x: topRight.x, y: topLeft.y+boundingBox.height)
+
+        return drawFocusSquare(corners: [topLeft, topRight, bottomRight, bottomLeft])
     }
 
     func resetVirtualObject() {
