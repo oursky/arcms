@@ -17,6 +17,9 @@ class VODownloader: NSObject {
     private var loadedVO = [String: VirtualObject]()
     private var invalidURL = [URL]()
 
+    // unit: MB
+    private var cacheSize = 50.0
+
     func downloadVirtualObject(url: URL, completion:@escaping (_ virtualObject: VirtualObject?) -> Void) {
         DispatchQueue.global().async {
             guard !self.loadingSCN.contains(url) else {
@@ -25,7 +28,7 @@ class VODownloader: NSObject {
             }
 
             guard !self.loadedSCN.contains(url) else {
-                print("[VODownloader] Cached object")
+                print("[VODownloader] Cached object in memory")
                 completion(self.loadedVO[url.absoluteString])
                 return
             }
@@ -53,6 +56,8 @@ class VODownloader: NSObject {
                 self.loadedVO[url.absoluteString] = virtualObject
                 self.endLoading(url: url)
                 completion(virtualObject)
+
+                self.updateCacheInDisk()
             })
         }
     }
@@ -68,10 +73,94 @@ class VODownloader: NSObject {
         }
     }
 
+    private func updateCacheInDisk() {
+        let filemgr = FileManager.default
+        let docURL = filemgr.urls(for: .documentDirectory, in: .userDomainMask).last
+        do {
+            let fileSize = getFileSizeInMB(ofURL: docURL!)
+            print("Cached files size in disk: \(String(describing: fileSize)) MB")
+            if fileSize > cacheSize {
+                print("Exceed cache size limit, cleaning up some files")
+                try cleanCacheInDisk()
+            }
+        } catch {
+            print("Error in updating cache \((docURL?.absoluteString)!).\n Error: \(error)")
+        }
+    }
+
+    private func cleanCacheInDisk() throws {
+        let filemgr = FileManager.default
+        let docURL = filemgr.urls(for: .documentDirectory, in: .userDomainMask).last
+        var filesArray = try filemgr.contentsOfDirectory(at: docURL!,
+                                                         includingPropertiesForKeys: [.isDirectoryKey, .contentAccessDateKey],
+                                                         options: .skipsHiddenFiles)
+
+        do {
+            filesArray = try sortByDate(ofFiles: filesArray)
+        } catch {
+            print("Error in sorting file array by date.\nError: \(error)")
+        }
+
+        print("Files in disk cache \(filesArray)")
+
+        var count = 0
+        while count < filesArray.count || getFileSizeInMB(ofURL: docURL!) > cacheSize {
+            let file = filesArray[count]
+            do {
+                print("Removing file at \(file.absoluteString)")
+                try filemgr.removeItem(at: file)
+            } catch {
+                print("Error in removing file at \(file.absoluteString)\nError: \(error)")
+            }
+            count += 1
+        }
+    }
+
+    private func sortByDate(ofFiles files: [URL]) throws -> [URL] {
+         return try files.sorted { (first, second) -> Bool in
+            let firstDateKey = try first.resourceValues(forKeys: [.contentAccessDateKey])
+            let firstAccessDate = firstDateKey.contentAccessDate
+
+            let secondDateKey = try second.resourceValues(forKeys: [.contentAccessDateKey])
+            let secondAccessDate = secondDateKey.contentAccessDate
+
+            return firstAccessDate! < secondAccessDate!
+        }
+    }
+
+    private func getFileSizeInMB(ofURL url: URL) -> Double {
+        do {
+            return try Double(FileManager.default.allocatedSizeOfDirectory(atUrl: url))/1000000
+        } catch {
+            print("Error in getting file size of \(url.absoluteString)")
+            return 0.0
+        }
+    }
+
     // Assumption: the url must be in this format http://$host/$fileID
     // (this link returns a json containing the paths to all texture files as well as the .scn file)
     // loand the scn file in http://$host/$fileID/$fileID.scn while the textures in http://$host/$fileID/textures
     private func downloadSCN(url: URL, completion:@escaping (_ scn: SCNScene?) -> Void) {
+        let modelName = url.pathComponents.last!
+        let hash = String(url.absoluteString.hash)
+        let (parentURL, textureURL) = self.prepareDirs(parentDir:hash)
+
+        guard parentURL != nil && textureURL != nil else {
+            completion(nil)
+            return
+        }
+
+        // if this file exists, load from disk directly
+        let filemgr = FileManager.default
+        let scnSaveURL = parentURL?.appendingPathComponent(modelName.appending(".scn"))
+        if filemgr.fileExists(atPath: (scnSaveURL?.path)!, isDirectory: nil) {
+            print("[VODownload] \(modelName) found in \((scnSaveURL?.path)!), load from disk directly")
+            self.loadScn(scnURL: scnSaveURL!) { scn in
+                completion(scn)
+            }
+            return
+        }
+
         Alamofire.request(url).responseJSON { response in
             guard let json = response.result.value as! [String: Any]? else {
                 print("Unable to receive the texture json from \(url.absoluteString)")
@@ -89,22 +178,15 @@ class VODownloader: NSObject {
                 return
             }
 
-            let (docURL, textureURL) = self.prepareDirs()
-
-            guard docURL != nil && textureURL != nil else {
-                completion(nil)
-                return
-            }
-
             filesToDownload.append(scnFilename)
             print(filesToDownload)
 
-            self.downloadFiles(filesToDownload, from: url, to: docURL!) { success in
+            self.downloadFiles(filesToDownload, from: url, to: parentURL!) { success in
                 if !success {
                     completion(nil)
                 }
 
-                let scnSaveURL = docURL?.appendingPathComponent(scnFilename)
+                let scnSaveURL = parentURL?.appendingPathComponent(scnFilename)
                 self.loadScn(scnURL: scnSaveURL!) { scn in
                     completion(scn)
                 }
@@ -112,20 +194,25 @@ class VODownloader: NSObject {
         }
     }
 
-    private func prepareDirs() -> (docUrl: URL?, textureURL: URL?) {
+    private func prepareDirs(parentDir: String) -> (parentURL: URL?, textureURL: URL?) {
         let filemgr = FileManager.default
         let docURL = filemgr.urls(for: .documentDirectory, in: .userDomainMask).last
-        let textureURL = docURL?.appendingPathComponent("textures", isDirectory: true)
-        var isDir: ObjCBool = false
-        if filemgr.fileExists(atPath: (textureURL?.path)!, isDirectory: &isDir) { try? filemgr.removeItem(at: textureURL!) }
+        let parentURL = docURL?.appendingPathComponent(parentDir, isDirectory: true)
+        let textureURL = parentURL?.appendingPathComponent("textures", isDirectory: true)
+        // if the both directories exist, it implies that the file has been downloaded -> return the urls
+        // if only root diretory exists but not texture directory, the file was downloaded incompletely, remove them and re-download
+        if filemgr.fileExists(atPath: (parentURL?.path)!) {
+            if filemgr.fileExists(atPath: (textureURL?.path)!) { return (parentURL, textureURL) } else { try? filemgr.removeItem(at: parentURL!) }
+        }
         do {
+            try filemgr.createDirectory(at: parentURL!, withIntermediateDirectories: false, attributes: nil)
             try filemgr.createDirectory(at: textureURL!, withIntermediateDirectories: false, attributes: nil)
         } catch let error {
-            print("Fail to create directory at \(textureURL!)\n Error: \(error)")
+            print("Fail to create directory\n Error: \(error)")
             return (nil, nil)
         }
 
-        return (docURL, textureURL)
+        return (parentURL, textureURL)
     }
 
     private func loadScn(scnURL: URL, completion:@escaping (_ scn: SCNScene?) -> Void) {
