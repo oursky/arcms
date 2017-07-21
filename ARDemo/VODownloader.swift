@@ -113,16 +113,16 @@ class VODownloader: NSObject {
     // loand the scn file in http://$host/$fileID/$fileID.scn while the textures in http://$host/$fileID/textures
     private func downloadSCN(url: URL, completion:@escaping (_ scn: SCNScene?) -> Void) {
         let modelName = url.pathComponents.last!
-        let (rootURL, textureURL) = self.prepareDirs(rootDir:modelName)
+        let (parentURL, textureURL) = self.prepareDirs(parentDir:modelName)
 
-        guard rootURL != nil && textureURL != nil else {
+        guard parentURL != nil && textureURL != nil else {
             completion(nil)
             return
         }
 
         // if this file exists, load from disk directly
         let filemgr = FileManager.default
-        let scnSaveURL = rootURL?.appendingPathComponent(modelName.appending(".scn"))
+        let scnSaveURL = parentURL?.appendingPathComponent(modelName.appending(".scn"))
         if filemgr.fileExists(atPath: (scnSaveURL?.path)!, isDirectory: nil) {
             print("[VODownload] \(modelName) found in \((scnSaveURL?.path)!), load from disk directly")
             self.loadScn(scnURL: scnSaveURL!) { scn in
@@ -151,12 +151,12 @@ class VODownloader: NSObject {
             filesToDownload.append(scnFilename)
             print(filesToDownload)
 
-            self.downloadFiles(filesToDownload, from: url, to: rootURL!) { success in
+            self.downloadFiles(filesToDownload, from: url, to: parentURL!) { success in
                 if !success {
                     completion(nil)
                 }
 
-                let scnSaveURL = rootURL?.appendingPathComponent(scnFilename)
+                let scnSaveURL = parentURL?.appendingPathComponent(scnFilename)
                 self.loadScn(scnURL: scnSaveURL!) { scn in
                     completion(scn)
                 }
@@ -164,25 +164,26 @@ class VODownloader: NSObject {
         }
     }
 
-    private func prepareDirs(rootDir: String) -> (rootURL: URL?, textureURL: URL?) {
+    private func prepareDirs(parentDir: String) -> (parentURL: URL?, textureURL: URL?) {
         let filemgr = FileManager.default
         let docURL = filemgr.urls(for: .documentDirectory, in: .userDomainMask).last
-        let rootURL = docURL?.appendingPathComponent(rootDir, isDirectory: true)
-        let textureURL = rootURL?.appendingPathComponent("textures", isDirectory: true)
+        let parentURL = docURL?.appendingPathComponent(parentDir, isDirectory: true)
+        let textureURL = parentURL?.appendingPathComponent("textures", isDirectory: true)
         // if the both directories exist, it implies that the file has been downloaded -> return the urls
         // if only root diretory exists but not texture directory, the file was downloaded incompletely, remove them and re-download
-        if filemgr.fileExists(atPath: (rootURL?.path)!) {
-            if filemgr.fileExists(atPath: (textureURL?.path)!) { return (rootURL, textureURL) } else { try? filemgr.removeItem(at: rootURL!) }
+        if filemgr.fileExists(atPath: (parentURL?.path)!) {
+            if filemgr.fileExists(atPath: (textureURL?.path)!) { return (parentURL, textureURL) }
+            else { try? filemgr.removeItem(at: parentURL!) }
         }
         do {
-            try filemgr.createDirectory(at: rootURL!, withIntermediateDirectories: false, attributes: nil)
+            try filemgr.createDirectory(at: parentURL!, withIntermediateDirectories: false, attributes: nil)
             try filemgr.createDirectory(at: textureURL!, withIntermediateDirectories: false, attributes: nil)
         } catch let error {
             print("Fail to create directory\n Error: \(error)")
             return (nil, nil)
         }
 
-        return (rootURL, textureURL)
+        return (parentURL, textureURL)
     }
 
     private func loadScn(scnURL: URL, completion:@escaping (_ scn: SCNScene?) -> Void) {
