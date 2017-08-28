@@ -9,67 +9,145 @@
 import UIKit
 import SceneKit
 import Alamofire
+import SKYKit
+import ZIPFoundation
 
-class VODownloader: NSObject {
-
-    private var loadedSCN = [URL]()
-    private var loadingSCN = [URL]()
+class VODownloader {
+    private var loadedSCN = [String]()
+    private var loadingSCN = [String]()
     private var loadedVO = [String: VirtualObject]()
-    private var invalidURL = [URL]()
-
+    private var invalidName = [String]()
+    var isLoading: Bool {
+        return loadingSCN.count > 0
+    }
     // unit: MB
     private var cacheSize = 50.0
 
-    func downloadVirtualObject(url: URL, completion:@escaping (_ virtualObject: VirtualObject?) -> Void) {
-        DispatchQueue.global().async {
-            guard !self.loadingSCN.contains(url) else {
+    private func isInvalid(name: String) -> Bool {
+        return invalidName.contains(name)
+    }
+
+    func getURLOfVirtualObject(named name: String, completion:@escaping (_ virtualObject: VirtualObject?) -> Void) {
+
+        guard !self.loadingSCN.contains(name) else {
+            completion(nil)
+            return
+        }
+
+        guard !self.loadedSCN.contains(name) else {
+            print("[VODownloader] Cached object in memory")
+            completion(self.loadedVO[name])
+            return
+        }
+
+        self.startLoading(name)
+
+        let query = SKYQuery(recordType: "model", predicate: NSPredicate(format: "name == %@", name))
+        SKYContainer.default().publicCloudDatabase.perform(query) { (results, error) in
+            if error != nil {
+                print ("error querying todos: \(error!)")
                 completion(nil)
                 return
             }
-
-            guard !self.loadedSCN.contains(url) else {
-                print("[VODownloader] Cached object in memory")
-                completion(self.loadedVO[url.absoluteString])
-                return
-            }
-
-            print("Start downloading the scn file from \(url.absoluteString)")
-            guard !self.isInvalid(url: url) else {
-                print("Invalid url \(url.absoluteString)")
+            // todo get [url] for [models]
+            print ("Received \(results!.count) models.")
+            let record = results?.first
+            guard record != nil else {
+                self.endLoading(name: name)
+                self.invalidName.append(name)
                 completion(nil)
                 return
             }
-            self.startLoading(url: url)
-
-            self.downloadSCN(url: url, completion: { scene in
-                guard scene != nil else {
-                    self.endLoading(url: url)
-                    self.invalidURL.append(url)
-                    completion(nil)
-                    return
-                }
-                let virtualObject = VirtualObject()
-                virtualObject.modelName = url.pathComponents.last!
-                print("Model name \(virtualObject.modelName)")
-                virtualObject.loadModel(scene!)
-                self.loadedSCN.append(url)
-                self.loadedVO[url.absoluteString] = virtualObject
-                self.endLoading(url: url)
-                completion(virtualObject)
-
-                self.updateCacheInDisk()
-            })
+            let model = record as! SKYRecord
+            print ("Got a model \(model["name"])")
+            if let asset = model.object(forKey: "model") as? SKYAsset {
+                let url = asset.url
+                print("Start downloading the scn file from \(url.absoluteString)")
+                self.downloadVirtualObject(named: name, url: url, completion: { scene in
+                    guard scene != nil else {
+                        self.endLoading(name: name)
+                        completion(nil)
+                        return
+                    }
+                    let virtualObject = VirtualObject()
+                    virtualObject.modelName = name
+                    print("Model name \(virtualObject.modelName)")
+                    virtualObject.loadModel(scene!)
+                    self.loadedSCN.append(name)
+                    self.loadedVO[name] = virtualObject
+                    self.endLoading(name: name)
+                    completion(virtualObject)
+                    //
+                    //                    self.updateCacheInDisk()
+                })
+            } else {
+                completion(nil)
+                return
+            }
         }
     }
 
-    private func startLoading(url: URL) {
-        loadingSCN.append(url)
+    private func startLoading(_ name: String) {
+        loadingSCN.append(name)
     }
 
-    private func endLoading(url: URL) {
-        let i = loadingSCN.index(of: url)
+    func downloadVirtualObject(named name: String, url: URL, completion:@escaping (_ scene: SCNScene?) -> Void) {
+        let fileManager = FileManager.default
+        let docURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).last!
+        let parentURL = docURL.appendingPathComponent(name, isDirectory: true)
+        // overwrite existing cache
+        if fileManager.fileExists(atPath: parentURL.path) {
+            do {
+                try fileManager.removeItem(at: parentURL)
+            } catch {
+                completion(nil)
+                return
+            }
+        }
+
+        let destination: DownloadRequest.DownloadFileDestination = { _, _ in
+            let targetFileURL = parentURL.appendingPathComponent(name + ".zip")
+            return (targetFileURL, [.removePreviousFile, .createIntermediateDirectories])
+        }
+
+        Alamofire.download(url, to: destination).response { response in
+            debugPrint(response.error ?? "")
+            if response.error == nil, let zipURL = response.destinationURL {
+                do {
+                    let before = try fileManager.contentsOfDirectory(atPath: parentURL.path)
+                    debugPrint("before unzip", before)
+
+                    try fileManager.unzipItem(at: zipURL, to: parentURL)
+
+                    let after = try fileManager.contentsOfDirectory(atPath: parentURL.path)
+                    debugPrint("after unzip", after)
+
+                    let scnURL = parentURL.appendingPathComponent(name + ".scn")
+                    let scene = try? SCNScene(url: scnURL)
+                    completion(scene)
+                } catch {
+                    print("Extraction of ZIP archive failed with error:\(error)")
+                    completion(nil)
+                }
+            } else {
+                completion(nil)
+            }
+        }
+    }
+
+    private func endLoading(name: String) {
+        let i = loadingSCN.index(of: name)
         if i != nil {
             loadingSCN.remove(at: i!)
+        }
+    }
+
+    private func getFileSizeInMB(ofURL url: URL) -> Double {
+        do {
+            return try Double(FileManager.default.allocatedSizeOfDirectory(atUrl: url))/1000000
+        } catch {
+            print("Error in getting file size of \(url.absoluteString)")
+            return 0.0
         }
     }
 
@@ -117,7 +195,7 @@ class VODownloader: NSObject {
     }
 
     private func sortByDate(ofFiles files: [URL]) throws -> [URL] {
-         return try files.sorted { (first, second) -> Bool in
+        return try files.sorted { (first, second) -> Bool in
             let firstDateKey = try first.resourceValues(forKeys: [.contentAccessDateKey])
             let firstAccessDate = firstDateKey.contentAccessDate
 
@@ -126,148 +204,5 @@ class VODownloader: NSObject {
 
             return firstAccessDate! < secondAccessDate!
         }
-    }
-
-    private func getFileSizeInMB(ofURL url: URL) -> Double {
-        do {
-            return try Double(FileManager.default.allocatedSizeOfDirectory(atUrl: url))/1000000
-        } catch {
-            print("Error in getting file size of \(url.absoluteString)")
-            return 0.0
-        }
-    }
-
-    // Assumption: the url must be in this format http://$host/$fileID
-    // (this link returns a json containing the paths to all texture files as well as the .scn file)
-    // loand the scn file in http://$host/$fileID/$fileID.scn while the textures in http://$host/$fileID/textures
-    private func downloadSCN(url: URL, completion:@escaping (_ scn: SCNScene?) -> Void) {
-        let modelName = url.pathComponents.last!
-        let hash = String(url.absoluteString.hash)
-        let (parentURL, textureURL) = self.prepareDirs(parentDir:hash)
-
-        guard parentURL != nil && textureURL != nil else {
-            completion(nil)
-            return
-        }
-
-        // if this file exists, load from disk directly
-        let filemgr = FileManager.default
-        let scnSaveURL = parentURL?.appendingPathComponent(modelName.appending(".scn"))
-        if filemgr.fileExists(atPath: (scnSaveURL?.path)!, isDirectory: nil) {
-            print("[VODownload] \(modelName) found in \((scnSaveURL?.path)!), load from disk directly")
-            self.loadScn(scnURL: scnSaveURL!) { scn in
-                completion(scn)
-            }
-            return
-        }
-
-        Alamofire.request(url).responseJSON { response in
-            guard let json = response.result.value as! [String: Any]? else {
-                print("Unable to receive the texture json from \(url.absoluteString)")
-                completion(nil)
-                return
-            }
-            guard var filesToDownload = json["textures"] as? [String] else {
-                print("No \"textures\" entry in the returned json")
-                completion(nil)
-                return
-            }
-
-            guard let scnFilename = json["scn"] as? String else {
-                completion(nil)
-                return
-            }
-
-            filesToDownload.append(scnFilename)
-            print(filesToDownload)
-
-            self.downloadFiles(filesToDownload, from: url, to: parentURL!) { success in
-                if !success {
-                    completion(nil)
-                }
-
-                let scnSaveURL = parentURL?.appendingPathComponent(scnFilename)
-                self.loadScn(scnURL: scnSaveURL!) { scn in
-                    completion(scn)
-                }
-            }
-        }
-    }
-
-    private func prepareDirs(parentDir: String) -> (parentURL: URL?, textureURL: URL?) {
-        let filemgr = FileManager.default
-        let docURL = filemgr.urls(for: .documentDirectory, in: .userDomainMask).last
-        let parentURL = docURL?.appendingPathComponent(parentDir, isDirectory: true)
-        let textureURL = parentURL?.appendingPathComponent("textures", isDirectory: true)
-        // if the both directories exist, it implies that the file has been downloaded -> return the urls
-        // if only root diretory exists but not texture directory, the file was downloaded incompletely, remove them and re-download
-        if filemgr.fileExists(atPath: (parentURL?.path)!) {
-            if filemgr.fileExists(atPath: (textureURL?.path)!) { return (parentURL, textureURL) } else { try? filemgr.removeItem(at: parentURL!) }
-        }
-        do {
-            try filemgr.createDirectory(at: parentURL!, withIntermediateDirectories: false, attributes: nil)
-            try filemgr.createDirectory(at: textureURL!, withIntermediateDirectories: false, attributes: nil)
-        } catch let error {
-            print("Fail to create directory\n Error: \(error)")
-            return (nil, nil)
-        }
-
-        return (parentURL, textureURL)
-    }
-
-    private func loadScn(scnURL: URL, completion:@escaping (_ scn: SCNScene?) -> Void) {
-        do {
-            let scnFile = try SCNScene(url: scnURL)
-            completion(scnFile)
-        } catch let error {
-            completion(nil)
-            print("Error in writing/reading scn file: \(error)")
-        }
-    }
-
-    private func downloadFile(from src: URL,
-                              to dest: URL,
-                              completion:@escaping (_ successful: Bool) -> Void) {
-        Alamofire.request(src).responseData { response in
-            do {
-                try response.data?.write(to: dest, options: .atomicWrite)
-                completion(true)
-            } catch let error {
-                print("Error in downloadFile from \(src.absoluteString) to \(dest.absoluteString): \(error)")
-                completion(false)
-            }
-        }
-    }
-
-    private func downloadFiles(_ files: [String],
-                               from  srcRootURL: URL,
-                               to destRootURL: URL,
-                               completion:@escaping(_ successful: Bool) -> Void) {
-        var count = 0
-        var errCount = 0
-        for file in files {
-            let src = srcRootURL.appendingPathComponent(file)
-            let dest = destRootURL.appendingPathComponent(file)
-            downloadFile(from: src, to: dest) { success in
-                if !success {
-                    errCount += 1
-                    print("Fail to download \(src)")
-                    completion(false)
-                    return
-                }
-                count += 1
-                if count >= files.count {
-                    if errCount == 0 { completion(success) }
-                }
-            }
-        }
-    }
-
-    private func isInvalid(url: URL) -> Bool {
-        return invalidURL.contains(url)
-    }
-
-    func isLoading() -> Bool {
-        return !(loadingSCN.count == 0)
     }
 }

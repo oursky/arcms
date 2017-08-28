@@ -142,13 +142,7 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
 
         updateDebugUI(corners)
 
-        guard let url = URL(string: message) else {
-            showNotURLError()
-            print("Incorrect url: \(message)")
-            return
-        }
-
-        let modelName = url.pathComponents.last!
+        let modelName = message
         if virtualObject?.modelName == modelName {
             let centroid = Utilities.intersection(u1: corners[0], u2: corners[2], v1: corners[1], v2: corners[3])
             print("put virutal object at centroid \(centroid)")
@@ -156,12 +150,12 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
             return
         }
 
-        if voDownloader.isLoading() {
+        if voDownloader.isLoading {
             showProgressHUD()
             return
         }
 
-        voDownloader.downloadVirtualObject(url: url, completion: { virtualObject in
+        voDownloader.getURLOfVirtualObject(named: modelName, completion: { virtualObject in
             guard virtualObject != nil else {
                 self.showUnableToLoadError()
                 return
