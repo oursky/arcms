@@ -12,6 +12,7 @@ import ARKit
 import Vision
 import PKHUD
 import Photos
+import SKYKit
 
 class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
 
@@ -58,8 +59,15 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         // Prevent the screen from being dimmed after a while.
         UIApplication.shared.isIdleTimerDisabled = true
 
-        // Start the ARSession.
-        restartPlaneDetection()
+        let skygear = SKYContainer.default()
+        skygear.auth.signupAnonymously(completionHandler: { (_, error) in
+            if error != nil {
+                print("Signup Error: \(error!.localizedDescription)")
+                return
+            }
+            // Start the ARSession.
+            self.restartPlaneDetection()
+        })
     }
 
     // MARK: Planes
