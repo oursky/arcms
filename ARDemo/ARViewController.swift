@@ -18,7 +18,6 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     // MARK: ARKit / ARSCNView
     var sceneView: ARSCNView!
     var session = ARSession()
-    var sessionConfig: ARSessionConfiguration = ARWorldTrackingSessionConfiguration()
 
     var lineView: LineView!
     var centerPt: UIView!
@@ -66,10 +65,9 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     // MARK: Planes
     private func restartPlaneDetection () {
         // configure session
-        if let worldSessionConfig = sessionConfig as? ARWorldTrackingSessionConfiguration {
-            worldSessionConfig.planeDetection = .horizontal
-            session.run(worldSessionConfig, options: [.resetTracking, .removeExistingAnchors])
-        }
+        let configuration = ARWorldTrackingConfiguration()
+        configuration.planeDetection = .horizontal
+        session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
     }
 
     // MARK: View setup
