@@ -6,6 +6,8 @@ target 'ARDemo' do
   use_frameworks!
 
   # Pods for ARDemo
+  pod 'ZIPFoundation'
+  pod 'SKYKit', :git => 'https://github.com/SkygearIO/skygear-SDK-iOS.git'
   pod 'Alamofire', '~> 4.4'
   pod 'PKHUD', :git => 'https://github.com/pkluz/PKHUD.git', :branch => 'release/swift4'
 
