@@ -10,7 +10,7 @@ import ARKit
 import Vision
 
 protocol QRCodeTrackerDelegate {
-    func qrCodesDidUpdate(_ barcodes: [VNBarcodeObservation])
+    func qrCodesDidUpdate(_ qrCodes: [VNBarcodeObservation], at frame: ARFrame)
 }
 
 class QRCodeTracker: NSObject, ARSessionDelegate {
@@ -19,10 +19,11 @@ class QRCodeTracker: NSObject, ARSessionDelegate {
     var processingFrame: ARFrame?
     var currentQRCodes = [VNBarcodeObservation]() {
         didSet {
-            let oldPayloads = oldValue.map({ $0.payloadStringValue ?? "" })
-            let newPayloads = currentQRCodes.map({ $0.payloadStringValue ?? "" })
+            let newPayloads = currentQRCodes.map { $0.payloadStringValue ?? "" }
+            let oldPayloads = oldValue.map { $0.payloadStringValue ?? "" }
+            // both are already sorted, can be compared directly
             if newPayloads.sorted() != oldPayloads.sorted() {
-                delegate?.qrCodesDidUpdate(currentQRCodes)
+                delegate?.qrCodesDidUpdate(currentQRCodes, at: processingFrame!)
             }
         }
     }
@@ -44,7 +45,7 @@ class QRCodeTracker: NSObject, ARSessionDelegate {
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
         guard processingFrame == nil else { return }
         processingFrame = frame
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.global(qos: .background).async {
             do {
                 let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: frame.capturedImage)
                 try imageRequestHandler.perform([self.detectQRCodesRequest])
