@@ -151,7 +151,7 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         }
 
         if voDownloader.isLoading {
-            showProgressHUD()
+            showProgressHUD(with: modelName)
             return
         }
 
@@ -192,11 +192,11 @@ class ARViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         showErrorHUD(title: "Error", subtitle: "Fail to load the object")
     }
 
-    private func showProgressHUD() {
+    private func showProgressHUD(with modelName: String) {
         guard currentHUD != "progress" else { return }
         currentHUD = "progress"
         DispatchQueue.main.async {
-            HUD.show(.progress)
+            HUD.show(.labeledProgress(title: nil, subtitle: "Loading \(modelName)"))
         }
     }
 
