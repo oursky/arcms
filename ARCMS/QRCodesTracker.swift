@@ -9,21 +9,21 @@
 import ARKit
 import Vision
 
-protocol QRCodeTrackerDelegate {
-    func qrCodesDidUpdate(_ qrCodes: [VNBarcodeObservation], at frame: ARFrame)
+protocol QRCodesTrackerDelegate {
+    func qrCodesDidUpdate(persisted: [VNBarcodeObservation], removed: [VNBarcodeObservation], added: [VNBarcodeObservation], at frame: ARFrame)
 }
 
-class QRCodeTracker: NSObject, ARSessionDelegate {
+class QRCodesTracker: NSObject, ARSessionDelegate {
     
-    var delegate: QRCodeTrackerDelegate?
+    var delegate: QRCodesTrackerDelegate?
     var processingFrame: ARFrame?
     var currentQRCodes = [VNBarcodeObservation]() {
         didSet {
-            let newPayloads = currentQRCodes.map { $0.payloadStringValue ?? "" }
-            let oldPayloads = oldValue.map { $0.payloadStringValue ?? "" }
-            // both are already sorted, can be compared directly
-            if newPayloads.sorted() != oldPayloads.sorted() {
-                delegate?.qrCodesDidUpdate(currentQRCodes, at: processingFrame!)
+            if !currentQRCodes.elementsEqual(oldValue, by: ==) {
+                let persisted = oldValue.intersection(currentQRCodes)
+                let removed = oldValue.subtracting(currentQRCodes)
+                let added = currentQRCodes.subtracting(oldValue)
+                delegate?.qrCodesDidUpdate(persisted: persisted, removed: removed, added: added, at: processingFrame!)
             }
         }
     }
@@ -31,6 +31,7 @@ class QRCodeTracker: NSObject, ARSessionDelegate {
     lazy var detectQRCodesRequest: VNDetectBarcodesRequest = {
         let detectBarcodesRequest = VNDetectBarcodesRequest { (request, error) in
             if let observations = request.results as? [VNBarcodeObservation] {
+                // sorted for convenience in comparsion in didSet
                 self.currentQRCodes = observations
                 self.processingFrame = nil
             } else {
@@ -45,7 +46,7 @@ class QRCodeTracker: NSObject, ARSessionDelegate {
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
         guard processingFrame == nil else { return }
         processingFrame = frame
-        DispatchQueue.global(qos: .background).async {
+        DispatchQueue.global(qos: .userInitiated).async {
             do {
                 let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: frame.capturedImage)
                 try imageRequestHandler.perform([self.detectQRCodesRequest])

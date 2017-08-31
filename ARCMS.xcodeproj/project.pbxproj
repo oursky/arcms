@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5E1945A31F559E750069AC3B /* QRCodeTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E1945A21F559E750069AC3B /* QRCodeTracker.swift */; };
+		5E1945A31F559E750069AC3B /* QRCodesTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E1945A21F559E750069AC3B /* QRCodesTracker.swift */; };
+		5E8F67241F56C941000CFE3A /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E8F67231F56C941000CFE3A /* Utilities.swift */; };
 		5EF702291F545BC600E13E50 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EF702281F545BC600E13E50 /* AppDelegate.swift */; };
 		5EF7022B1F545BC600E13E50 /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 5EF7022A1F545BC600E13E50 /* art.scnassets */; };
 		5EF7022D1F545BC600E13E50 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EF7022C1F545BC600E13E50 /* ViewController.swift */; };
@@ -17,8 +18,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		5E1945A21F559E750069AC3B /* QRCodeTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeTracker.swift; sourceTree = "<group>"; };
+		5E1945A21F559E750069AC3B /* QRCodesTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodesTracker.swift; sourceTree = "<group>"; };
 		5E1945A41F5661320069AC3B /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		5E8F67231F56C941000CFE3A /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		5EF702251F545BC600E13E50 /* ARCMS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARCMS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5EF702281F545BC600E13E50 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		5EF7022A1F545BC600E13E50 /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
@@ -63,7 +65,8 @@
 				5EF702281F545BC600E13E50 /* AppDelegate.swift */,
 				5EF7022A1F545BC600E13E50 /* art.scnassets */,
 				5EF7022C1F545BC600E13E50 /* ViewController.swift */,
-				5E1945A21F559E750069AC3B /* QRCodeTracker.swift */,
+				5E1945A21F559E750069AC3B /* QRCodesTracker.swift */,
+				5E8F67231F56C941000CFE3A /* Utilities.swift */,
 				5EF7022E1F545BC600E13E50 /* Main.storyboard */,
 				5EF702311F545BC600E13E50 /* Assets.xcassets */,
 				5EF702331F545BC600E13E50 /* LaunchScreen.storyboard */,
@@ -147,7 +150,8 @@
 			files = (
 				5EF7022D1F545BC600E13E50 /* ViewController.swift in Sources */,
 				5EF702291F545BC600E13E50 /* AppDelegate.swift in Sources */,
-				5E1945A31F559E750069AC3B /* QRCodeTracker.swift in Sources */,
+				5E8F67241F56C941000CFE3A /* Utilities.swift in Sources */,
+				5E1945A31F559E750069AC3B /* QRCodesTracker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
