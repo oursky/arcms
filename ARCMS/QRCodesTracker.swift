@@ -1,5 +1,5 @@
 //
-//  QRCodeTracker.swift
+//  QRCodesTracker.swift
 //  ARCMS
 //
 //  Created by siuming on 29/8/2017.

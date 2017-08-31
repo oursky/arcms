@@ -10,6 +10,7 @@ import UIKit
 import SceneKit
 import ARKit
 import Vision
+import SKYKit
 
 class ViewController: UIViewController, ARSCNViewDelegate, QRCodesTrackerDelegate {
 
@@ -42,7 +43,15 @@ class ViewController: UIViewController, ARSCNViewDelegate, QRCodesTrackerDelegat
         super.viewWillAppear(animated)
         let configuration = ARWorldTrackingConfiguration()
         configuration.planeDetection = .horizontal
-        sceneView.session.run(configuration)
+        let skygear = SKYContainer.default()
+        skygear.auth.signupAnonymously(completionHandler: { (_, error) in
+            if error != nil {
+                print("Signup Error: \(error!.localizedDescription)")
+                return
+            }
+            // Start the ARSession.
+            self.sceneView.session.run(configuration)
+        })
     }
     
     override func viewWillDisappear(_ animated: Bool) {

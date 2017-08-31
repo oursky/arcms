@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5A09324D7D7458C6B63D275F /* Pods_ARCMS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5F200A95DA596BF2262BF0 /* Pods_ARCMS.framework */; };
 		5E1945A31F559E750069AC3B /* QRCodesTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E1945A21F559E750069AC3B /* QRCodesTracker.swift */; };
 		5E8F67241F56C941000CFE3A /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E8F67231F56C941000CFE3A /* Utilities.swift */; };
 		5EF702291F545BC600E13E50 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EF702281F545BC600E13E50 /* AppDelegate.swift */; };
@@ -29,6 +30,9 @@
 		5EF702311F545BC600E13E50 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5EF702341F545BC600E13E50 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		5EF702361F545BC600E13E50 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6EC038F6EF20D07E24EF4BF6 /* Pods-ARCMS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARCMS.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ARCMS/Pods-ARCMS.debug.xcconfig"; sourceTree = "<group>"; };
+		CA5F200A95DA596BF2262BF0 /* Pods_ARCMS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ARCMS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		E83F98DF898AF27D396AD865 /* Pods-ARCMS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ARCMS.release.xcconfig"; path = "Pods/Target Support Files/Pods-ARCMS/Pods-ARCMS.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,18 +40,30 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5A09324D7D7458C6B63D275F /* Pods_ARCMS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		52C015F5E178CDF71A448F5F /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				6EC038F6EF20D07E24EF4BF6 /* Pods-ARCMS.debug.xcconfig */,
+				E83F98DF898AF27D396AD865 /* Pods-ARCMS.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		5EF7021C1F545BC600E13E50 = {
 			isa = PBXGroup;
 			children = (
 				5E1945A41F5661320069AC3B /* README.md */,
 				5EF702271F545BC600E13E50 /* ARCMS */,
 				5EF702261F545BC600E13E50 /* Products */,
+				52C015F5E178CDF71A448F5F /* Pods */,
+				7983460AD5F482952E83B931 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -75,6 +91,14 @@
 			path = ARCMS;
 			sourceTree = "<group>";
 		};
+		7983460AD5F482952E83B931 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CA5F200A95DA596BF2262BF0 /* Pods_ARCMS.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -82,9 +106,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 5EF702391F545BC600E13E50 /* Build configuration list for PBXNativeTarget "ARCMS" */;
 			buildPhases = (
+				F360C088D41BFDF72E67B1D3 /* [CP] Check Pods Manifest.lock */,
 				5EF702211F545BC600E13E50 /* Sources */,
 				5EF702221F545BC600E13E50 /* Frameworks */,
 				5EF702231F545BC600E13E50 /* Resources */,
+				785C32BF85B7F1C9EC9CA467 /* [CP] Embed Pods Frameworks */,
+				115D5C038C914DC30911516A /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -142,6 +169,64 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		115D5C038C914DC30911516A /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ARCMS/Pods-ARCMS-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		785C32BF85B7F1C9EC9CA467 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-ARCMS/Pods-ARCMS-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/FMDB/FMDB.framework",
+				"${BUILT_PRODUCTS_DIR}/SKYKit/SKYKit.framework",
+				"${BUILT_PRODUCTS_DIR}/SocketRocket/SocketRocket.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FMDB.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SKYKit.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SocketRocket.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ARCMS/Pods-ARCMS-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		F360C088D41BFDF72E67B1D3 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ARCMS-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		5EF702211F545BC600E13E50 /* Sources */ = {
@@ -286,6 +371,7 @@
 		};
 		5EF7023A1F545BC600E13E50 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6EC038F6EF20D07E24EF4BF6 /* Pods-ARCMS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -301,6 +387,7 @@
 		};
 		5EF7023B1F545BC600E13E50 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E83F98DF898AF27D396AD865 /* Pods-ARCMS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;

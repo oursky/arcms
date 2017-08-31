@@ -1,0 +1,34 @@
+PODS:
+  - FMDB (2.7.2):
+    - FMDB/standard (= 2.7.2)
+  - FMDB/standard (2.7.2)
+  - SKYKit (1.1.0):
+    - SKYKit/Core (= 1.1.0)
+    - SKYKit/ForgotPassword (= 1.1.0)
+  - SKYKit/Core (1.1.0):
+    - FMDB (~> 2.5)
+    - SocketRocket (~> 0.4)
+  - SKYKit/ForgotPassword (1.1.0):
+    - SKYKit/Core
+  - SocketRocket (0.5.1)
+
+DEPENDENCIES:
+  - SKYKit (from `https://github.com/SkygearIO/skygear-SDK-iOS.git`)
+
+EXTERNAL SOURCES:
+  SKYKit:
+    :git: https://github.com/SkygearIO/skygear-SDK-iOS.git
+
+CHECKOUT OPTIONS:
+  SKYKit:
+    :commit: 50684581dd32b341b576050fd7b8dba3b185a78b
+    :git: https://github.com/SkygearIO/skygear-SDK-iOS.git
+
+SPEC CHECKSUMS:
+  FMDB: 6198a90e7b6900cfc046e6bc0ef6ebb7be9236aa
+  SKYKit: 124d42572fc55e93dadc3a4136a7fcfa956c680b
+  SocketRocket: d57c7159b83c3c6655745cd15302aa24b6bae531
+
+PODFILE CHECKSUM: 59323f43360bc9213396fb124760c80a4c1b951f
+
+COCOAPODS: 1.3.1

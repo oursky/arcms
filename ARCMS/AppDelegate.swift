@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SKYKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,6 +17,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        SKYContainer.default().configAddress("https://arcms.skygeario.com/")
+        SKYContainer.default().configure(withAPIKey: "c41ee6072ee342b89f33d44df9247e0c")
         return true
     }
 
