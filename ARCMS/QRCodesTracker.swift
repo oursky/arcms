@@ -10,20 +10,23 @@ import ARKit
 import Vision
 
 protocol QRCodesTrackerDelegate {
-    func qrCodesDidUpdate(persisted: [VNBarcodeObservation], removed: [VNBarcodeObservation], added: [VNBarcodeObservation], at frame: ARFrame)
+//    func qrCodesDidUpdate(persisted: Set<QRCode>, discovered: Set<QRCode>, at frame: ARFrame)
+    func qrCodesDidUpdate(_ QRCodes: Set<QRCode>, at frame: ARFrame)
 }
 
 class QRCodesTracker: NSObject, ARSessionDelegate {
     
     var delegate: QRCodesTrackerDelegate?
     var processingFrame: ARFrame?
-    var currentQRCodes = [VNBarcodeObservation]() {
+    var currentQRCodes = Set<QRCode>() {
         didSet {
-            if !currentQRCodes.elementsEqual(oldValue, by: ==) {
-                let persisted = oldValue.intersection(currentQRCodes)
-                let removed = oldValue.subtracting(currentQRCodes)
-                let added = currentQRCodes.subtracting(oldValue)
-                delegate?.qrCodesDidUpdate(persisted: persisted, removed: removed, added: added, at: processingFrame!)
+            if currentQRCodes != oldValue {
+                // intersection() will pick up elements in LHS by testing in playgroud
+                // so put newer QR codes on LHS to get latest position
+//                let persisted = currentQRCodes.intersection(oldValue)
+//                let discovered = currentQRCodes.subtracting(oldValue)
+                // do not remove anything in a session, else strange flashing behavior will appear, keep it at last position
+                delegate?.qrCodesDidUpdate(currentQRCodes, at: processingFrame!)
             }
         }
     }
@@ -31,8 +34,10 @@ class QRCodesTracker: NSObject, ARSessionDelegate {
     lazy var detectQRCodesRequest: VNDetectBarcodesRequest = {
         let detectBarcodesRequest = VNDetectBarcodesRequest { (request, error) in
             if let observations = request.results as? [VNBarcodeObservation] {
-                // sorted for convenience in comparsion in didSet
-                self.currentQRCodes = observations
+                let qrCodes = observations.map { QRCode(in: $0) }
+                // Vision often mis-detects single QR code to two equivalent
+                // Assumption of no duplicated QR code in an ARSession is made as a workaround
+                self.currentQRCodes = Set(qrCodes)
                 self.processingFrame = nil
             } else {
                 // fail to cast
