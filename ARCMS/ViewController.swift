@@ -44,7 +44,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, QRCodesTrackerDelegat
         let configuration = ARWorldTrackingConfiguration()
         configuration.planeDetection = .horizontal
         let skygear = SKYContainer.default()
-        skygear.auth.signupAnonymously(completionHandler: { (_, error) in
+        skygear.auth.signupAnonymously(completionHandler: { _, error in
             if error != nil {
                 print("Signup Error: \(error!.localizedDescription)")
                 return
@@ -62,6 +62,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, QRCodesTrackerDelegat
     func qrCodesDidUpdate(_ QRCodes: Set<QRCode>, at frame: ARFrame) {
         print("before \(Set(store.keys).map { $0.payload })")
         let accumulatedQRCodes = Set(store.keys)
+        // intersection() will pick up elements in LHS by testing in playgroud
+        // so put newer QR codes on LHS to get latest position
         let persisted = QRCodes.intersection(accumulatedQRCodes)
         let discovered = QRCodes.subtracting(accumulatedQRCodes)
         DispatchQueue.main.async {
