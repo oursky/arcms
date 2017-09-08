@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		5A09324D7D7458C6B63D275F /* Pods_ARCMS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA5F200A95DA596BF2262BF0 /* Pods_ARCMS.framework */; };
 		5E1945A31F559E750069AC3B /* QRCodesTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E1945A21F559E750069AC3B /* QRCodesTracker.swift */; };
+		5E332EA71F6281990074BFEF /* ModelsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E332EA61F6281990074BFEF /* ModelsManager.swift */; };
 		5E995EA91F599C4B00AA92DD /* QRCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E995EA81F599C4B00AA92DD /* QRCode.swift */; };
 		5EF702291F545BC600E13E50 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EF702281F545BC600E13E50 /* AppDelegate.swift */; };
 		5EF7022B1F545BC600E13E50 /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 5EF7022A1F545BC600E13E50 /* art.scnassets */; };
@@ -21,6 +22,7 @@
 /* Begin PBXFileReference section */
 		5E1945A21F559E750069AC3B /* QRCodesTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodesTracker.swift; sourceTree = "<group>"; };
 		5E1945A41F5661320069AC3B /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		5E332EA61F6281990074BFEF /* ModelsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsManager.swift; sourceTree = "<group>"; };
 		5E995EA81F599C4B00AA92DD /* QRCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCode.swift; sourceTree = "<group>"; };
 		5EF702251F545BC600E13E50 /* ARCMS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARCMS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5EF702281F545BC600E13E50 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -82,6 +84,7 @@
 				5EF7022C1F545BC600E13E50 /* ViewController.swift */,
 				5E1945A21F559E750069AC3B /* QRCodesTracker.swift */,
 				5E995EA81F599C4B00AA92DD /* QRCode.swift */,
+				5E332EA61F6281990074BFEF /* ModelsManager.swift */,
 				5EF702311F545BC600E13E50 /* Assets.xcassets */,
 				5EF7022A1F545BC600E13E50 /* art.scnassets */,
 				5EF702331F545BC600E13E50 /* LaunchScreen.storyboard */,
@@ -194,12 +197,14 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-ARCMS/Pods-ARCMS-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/FMDB/FMDB.framework",
+				"${BUILT_PRODUCTS_DIR}/PromiseKit/PromiseKit.framework",
 				"${BUILT_PRODUCTS_DIR}/SKYKit/SKYKit.framework",
 				"${BUILT_PRODUCTS_DIR}/SocketRocket/SocketRocket.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FMDB.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/PromiseKit.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SKYKit.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SocketRocket.framework",
 			);
@@ -235,6 +240,7 @@
 			files = (
 				5EF7022D1F545BC600E13E50 /* ViewController.swift in Sources */,
 				5EF702291F545BC600E13E50 /* AppDelegate.swift in Sources */,
+				5E332EA71F6281990074BFEF /* ModelsManager.swift in Sources */,
 				5E1945A31F559E750069AC3B /* QRCodesTracker.swift in Sources */,
 				5E995EA91F599C4B00AA92DD /* QRCode.swift in Sources */,
 			);

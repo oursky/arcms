@@ -6,6 +6,7 @@ target 'ARCMS' do
   use_frameworks!
 
   # Pods for ARCMS
+  pod 'PromiseKit', '~> 4.4'
   pod 'SKYKit', :git => 'https://github.com/SkygearIO/skygear-SDK-iOS.git'
 
 end
